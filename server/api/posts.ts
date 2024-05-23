@@ -6,9 +6,10 @@ export default defineEventHandler(async (event) => {
   try {
     let workingDir = process.cwd() || "";
     console.log("Working directory:", workingDir);
-    const postsDirectory = path.resolve(workingDir, "static/posts");
-    let files;
+    const postsDirectory = path.join(workingDir, "static", "posts");
+    console.log("Posts directory:", postsDirectory);
 
+    let files;
     try {
       files = await fs.readdir(postsDirectory);
       console.log("Files:", files);
