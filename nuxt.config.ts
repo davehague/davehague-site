@@ -3,6 +3,7 @@ export default defineNuxtConfig({
     strict: true
   },
   css: ['~/assets/styles.css'],
+  ignore:  ['experiments'],
   app: {
     head: {
       title: 'Personal Site',

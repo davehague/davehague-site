@@ -4,7 +4,7 @@ import path from "path";
 
 export default defineEventHandler(async (event) => {
   try {
-    const postsDirectory = path.resolve("public", "posts");
+    const postsDirectory = path.resolve("static", "posts");
     let files;
 
     try {
