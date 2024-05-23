@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
     let workingDir = process.cwd() || "";
     console.log("Working directory:", workingDir);
     
-    const postsDirectory = path.join(workingDir, "public", "posts");
+    const postsDirectory = "posts"
     console.log("Posts directory:", postsDirectory);
 
     let files;
