@@ -8,7 +8,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "vercel-build": "cp -r public/markdown .vercel_output/static/markdown && nuxt build"
+    "vercel-build": "cp -r public/posts .vercel_output/static/markdown && nuxt build"
   },
   "dependencies": {
     "fs": "^0.0.1-security",

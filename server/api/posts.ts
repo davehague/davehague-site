@@ -7,7 +7,11 @@ export default defineEventHandler(async (event) => {
     let workingDir = process.cwd() || "";
     console.log("Working directory:", workingDir);
     
-    const postsDirectory = path.join(workingDir, "posts");
+    const isProduction = process.env.NODE_ENV === 'production';
+    const postsDirectory = isProduction 
+        ? path.join(process.cwd(), '.vercel_output/static/markdown') 
+        : path.join(process.cwd(), 'public/markdown');
+
     console.log("Posts directory:", postsDirectory);
 
     let files;
