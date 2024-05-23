@@ -1,5 +1,5 @@
 <template>
-<div class="content">
+  <div class="content">
     <site-header />
     <main>
       <section id="blog">
