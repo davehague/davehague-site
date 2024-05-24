@@ -1,50 +1,35 @@
-import { defineEventHandler } from "h3";
-import { promises as fs } from "fs";
-import path from "path";
-
 export default defineEventHandler(async (event) => {
+  let posts = [
+    {
+      title: "Second Post",
+      date: "2024-05-23",
+      url: "https://gdyjsqmpybjcsrevmlmq.supabase.co/storage/v1/object/public/blog-posts/2024-05-23-second-post.md?t=2024-05-24T15%3A32%3A43.322Z",
+      content: "",
+    },
+    {
+      title: "First Post",
+      date: "2024-05-22",
+      url: "https://gdyjsqmpybjcsrevmlmq.supabase.co/storage/v1/object/public/blog-posts/2024-05-22-first-post.md?t=2024-05-24T15%3A17%3A51.291Z",
+      content: "",
+    },
+  ];
+
+  async function fetchFile(url: string): Promise<string> {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch file: ${response.status} ${response.statusText}`
+      );
+    }
+    const text = await response.text();
+    return text;
+  }
+
   try {
-    let workingDir = process.cwd() || "";
-    console.log("Working directory:", workingDir);
-    
-    const isProduction = process.env.NODE_ENV === 'production';
-    const postsDirectory = isProduction 
-        ? path.join(process.cwd(), '.vercel_output/static/markdown') 
-        : path.join(process.cwd(), 'public/markdown');
-
-    console.log("Posts directory:", postsDirectory);
-
-    let files;
-    try {
-      files = await fs.readdir(postsDirectory);
-      console.log("Files:", files);
-    } catch (error) {
-      console.error("Error reading posts directory:", error);
-      throw new Error("Failed to read posts directory");
+    for (let post of posts) {
+      const markdownContent = await fetchFile(post.url);
+      post.content = markdownContent;
     }
-
-    const posts = [];
-
-    for (const file of files) {
-      const filePath = path.join(postsDirectory, file);
-      const content = await fs.readFile(filePath, "utf-8");
-      const post = {
-        title: file
-          .split("-")
-          .slice(5)
-          .join("-")
-          .replace(".md", "")
-          .replace(/-/g, " "),
-        date: file.split("-").slice(0, 5).join("-"),
-        content,
-        file: filePath,
-      };
-      posts.push(post);
-    }
-
-    // Sort posts by date in descending order
-    posts.sort((a, b) => (a.date < b.date ? 1 : -1));
-
     return posts;
   } catch (error) {
     console.error("Error fetching posts:", error);

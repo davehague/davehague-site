@@ -7,7 +7,7 @@
         <div id="blog-posts">
           <div v-for="post in blogPosts" :key="post.title" class="blog-post">
             <h2>{{ post.title }}</h2>
-            <div class="content" v-html="post.content"></div>
+            <div class="content" v-html="post.contentHtml"></div>
           </div>
         </div>
       </section>
@@ -25,8 +25,9 @@ import { marked } from 'marked'
 interface BlogPost {
   title: string
   date: string
-  content: string
-  file: string
+  url: string
+  content: string,
+  contentHtml: string
 }
 
 export default defineComponent({
@@ -35,22 +36,29 @@ export default defineComponent({
     SiteFooter
   },
   setup() {
-    const blogPosts = ref<BlogPost[]>([])
+    const blogPosts = ref<BlogPost[]>([]);
 
     const fetchPosts = async () => {
-      const response = await fetch('/api/posts')
-      const posts = await response.json()
-      for (const post of posts) {
-        post.content = marked(post.content)
-      }
-      blogPosts.value = posts
-    }
+      try {
+        const response = await fetch('/api/posts');
+        const postData = await response.json();
 
-    onMounted(fetchPosts)
+        if (postData) {
+          for (const post of postData) {
+            post.contentHtml = await marked(post.content);;
+            blogPosts.value.push(post);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load post:', error);
+      }
+    };
+
+    onMounted(fetchPosts);
 
     return {
       blogPosts
-    }
+    };
   }
 })
 </script>

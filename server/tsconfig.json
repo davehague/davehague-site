@@ -1,9 +1,4 @@
 {
   "extends": "../.nuxt/tsconfig.server.json",
-  "exclude": [
-    "node_modules",
-    "public/experiments/**",
-    "public/posts/**"
-  ]
 }
 
