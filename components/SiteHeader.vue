@@ -14,6 +14,7 @@
           </div>
         </li>
         <li><nuxt-link to="/about">About Me</nuxt-link></li>
+        <li><nuxt-link to="/stats">Stats</nuxt-link></li>
       </ul>
     </nav>
   </header>
