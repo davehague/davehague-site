@@ -13,8 +13,9 @@ export default defineEventHandler(async (event) => {
   }
 
   const token = process.env.GITHUB_TOKEN;
+  const username = 'davehague';
 
-  const response = await fetch(`https://api.github.com/repos/${repo}/commits?since=${since}`, {
+  const response = await fetch(`https://api.github.com/repos/${repo}/commits?author=${username}&since=${since}`, {
     headers: {
       'Authorization': `token ${token}`,
       'Accept': 'application/vnd.github.v3+json'

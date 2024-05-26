@@ -1,5 +1,6 @@
 <template>
   <div class="chart-container">
+    <h2>Total commits: {{  totalCommits }}</h2> 
     <select v-model="timeframe" @change="updateChart">
       <option value="ytd">Year to Date</option>
       <option value="month">Current Month</option>
@@ -22,6 +23,8 @@ export default defineComponent({
     const commitChart = ref<HTMLCanvasElement | null>(null);
     const timeframe = ref('week');
     let chartInstance: Chart | null = null;
+    const totalCommits = ref('');
+
 
     const fetchUserRepos = async (): Promise<string[]> => {
       try {
@@ -78,6 +81,8 @@ export default defineComponent({
       const filteredData = commitData.filter((data) => data > 0);
       const filteredRepos = repos.filter((repo, index) => commitData[index] > 0);
 
+      totalCommits.value = filteredData.reduce((acc, curr) => acc + curr, 0).toString();
+
       if (chartInstance) {
         chartInstance.destroy();
       }
@@ -102,6 +107,14 @@ export default defineComponent({
               }]
             },
             options: {
+              scales: {
+                r: {
+                  beginAtZero: true,
+                  ticks: {
+                    stepSize: 1,
+                  },
+                }
+              },
               maintainAspectRatio: false, 
               elements: {
                 line: {
@@ -125,7 +138,8 @@ export default defineComponent({
     return {
       commitChart,
       timeframe,
-      updateChart 
+      updateChart, 
+      totalCommits
     };
   }
 });
