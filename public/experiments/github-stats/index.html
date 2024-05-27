@@ -32,39 +32,56 @@
     <script>
         const apiUrl = 'https://api.github.com';
 
-        async function fetchUserRepos(token) {
+        async function fetchUserRepos(token, since) {
             const headers = {
                 'Authorization': `token ${token}`,
                 'Accept': 'application/vnd.github.v3+json'
             };
+
             const response = await fetch(`${apiUrl}/user/repos`, { headers });
-            return response.json();
+            const repos = await response.json();
+            const sinceDate = new Date(since);
+            return repos.filter(repo => new Date(repo.pushed_at) >= sinceDate);
         }
 
         async function fetchCommits(repo, since, token, author) {
+            if (!repo || !since) {
+                console.error('Missing required parameters: repo and since must be provided.');
+                return 0; 
+            }
+
             let allCommits = [];
             let page = 1;
-            let fetchMore = true;
+            const repoName = repo.name; 
             const headers = {
                 'Authorization': `token ${token}`,
                 'Accept': 'application/vnd.github.v3+json'
             };
 
-            while (fetchMore) {
-                const response = await fetch(`${apiUrl}/repos/${repo}/commits?since=${since.toISOString()}&author=${author}&per_page=100&page=${page}`, { headers });
+            while (true) {
+                console.log('Fetching commits for:', repoName, 'since:', since.toISOString(), 'Page:', page);
+                const url = `https://api.github.com/repos/${repoName}/commits?author=${author}&since=${since.toISOString()}&per_page=100&page=${page}`;
+                const response = await fetch(url, { headers });
+
+                if (!response.ok) {
+                    console.error('Failed to fetch commits:', response.status, response.statusText);
+                    throw new Error(`Failed to fetch commits: HTTP status ${response.status}`);
+                }
+
                 const data = await response.json();
                 if (data.length > 0) {
                     allCommits = allCommits.concat(data);
                     page++;
                 } else {
-                    fetchMore = false;
+                    break; 
                 }
             }
             return allCommits.length;
         }
 
+
         function validateInputs() {
-            const token = document.getElementById('token').value; 
+            const token = document.getElementById('token').value;
             const author = document.getElementById('author').value;
             const days = parseInt(document.getElementById('days').value);
 
@@ -80,7 +97,8 @@
             try {
                 const since = new Date();
                 since.setDate(since.getDate() - days);
-                const repos = await fetchUserRepos(token);
+                const repos = await fetchUserRepos(token, since);
+                const repoNames = repos.map(repo => repo.name);
                 const commitData = await Promise.all(repos.map(repo => fetchCommits(repo, since, token, author)));
                 const totalCommits = commitData.reduce((sum, current) => sum + current, 0);
                 document.getElementById('totalCommits').textContent = `Total Commits: ${totalCommits}`;
@@ -88,7 +106,7 @@
                 new Chart(ctx, {
                     type: 'radar',
                     data: {
-                        labels: repos,
+                        labels: repoNames,
                         datasets: [{
                             label: 'Number of Commits',
                             data: commitData,
