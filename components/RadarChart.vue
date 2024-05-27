@@ -1,6 +1,6 @@
 <template>
   <div class="chart-container">
-    <h2>Total commits: {{  totalCommits }}</h2> 
+    <h2>Total commits: {{ totalCommits }}</h2>
     <select v-model="timeframe" @change="updateChart">
       <option value="ytd">Year to Date</option>
       <option value="month">Current Month</option>
@@ -26,9 +26,9 @@ export default defineComponent({
     const totalCommits = ref('');
 
 
-    const fetchUserRepos = async (): Promise<string[]> => {
+    const fetchUserRepos = async (since: string): Promise<string[]> => {
       try {
-        const response = await fetch('/api/github/repos');
+        const response = await fetch(`/api/github/repos?since=${encodeURIComponent(since)}`);
         if (!response.ok) {
           throw new Error('Failed to fetch repositories');
         }
@@ -71,11 +71,11 @@ export default defineComponent({
           since = new Date(now.getFullYear(), 0, 1);
           break;
         default:
-          since = new Date(now.getFullYear(), 0, 1); 
+          since = new Date(now.getFullYear(), 0, 1);
           break;
       }
 
-      const repos = await fetchUserRepos();
+      const repos = await fetchUserRepos(since.toISOString());
       const commitData = await Promise.all(repos.map((repo: string) => fetchCommits(repo, since)));
 
       const filteredData = commitData.filter((data) => data > 0);
@@ -115,7 +115,7 @@ export default defineComponent({
                   },
                 }
               },
-              maintainAspectRatio: false, 
+              maintainAspectRatio: false,
               elements: {
                 line: {
                   borderWidth: 3
@@ -138,7 +138,7 @@ export default defineComponent({
     return {
       commitChart,
       timeframe,
-      updateChart, 
+      updateChart,
       totalCommits
     };
   }
@@ -150,7 +150,7 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 70vh; 
+  height: 70vh;
 }
 
 select {
@@ -159,6 +159,6 @@ select {
 
 canvas {
   width: 100%;
-  height: calc(70vh - 60px); 
+  height: calc(70vh - 60px);
 }
 </style>
