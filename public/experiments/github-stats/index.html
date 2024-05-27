@@ -20,51 +20,38 @@
 </head>
 
 <body>
-    <select id="timeframe">
-        <option value="ytd">Year to Date</option>
-        <option value="month">Current Month</option>
-        <option value="week">Current Week</option>
-        <option value="day">Today</option>
-    </select>
-    <nav>
-        <a href="?days=1">Last 1 Day</a>
-        <a href="?days=3">Last 3 Days</a>
-        <a href="?days=7">Last 7 Days</a>
-        <a href="?days=30">Last 30 Days</a>
-        <a href="?days=60">Last 60 Days</a>
-        <a href="?days=90">Last 90 Days</a>
-        <a href="?days=180">Last 180 Days</a>
-    </nav>
+    <div>
+        <input id="token" type="text" placeholder="GitHub Token">
+        <input id="author" type="text" placeholder="Author">
+        <input id="days" type="number" placeholder="Days">
+        <button onclick="validateInputs()">Update!</button>
+    </div>
+    <div id="error-message" style="color: red;"></div>
     <div id="totalCommits">Total Commits: </div>
-
     <canvas id="commitChart"></canvas>
     <script>
-        const params = new URLSearchParams(window.location.search);
-        const token = params.get('token');
-        const author = params.get('author');
-
         const apiUrl = 'https://api.github.com';
-        const headers = {
-            'Authorization': `token ${token}`,
-            'Accept': 'application/vnd.github.v3+json'
-        };
 
-        let chartInstance;
-
-        async function fetchUserRepos() {
+        async function fetchUserRepos(token) {
+            const headers = {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github.v3+json'
+            };
             const response = await fetch(`${apiUrl}/user/repos`, { headers });
-            const data = await response.json();
-            return data.map(repo => repo.full_name);
+            return response.json();
         }
 
-        async function fetchCommits(repo, since) {
+        async function fetchCommits(repo, since, token, author) {
             let allCommits = [];
             let page = 1;
             let fetchMore = true;
+            const headers = {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github.v3+json'
+            };
 
             while (fetchMore) {
                 const response = await fetch(`${apiUrl}/repos/${repo}/commits?since=${since.toISOString()}&author=${author}&per_page=100&page=${page}`, { headers });
-
                 const data = await response.json();
                 if (data.length > 0) {
                     allCommits = allCommits.concat(data);
@@ -73,123 +60,61 @@
                     fetchMore = false;
                 }
             }
-        
             return allCommits.length;
         }
 
-        function getCustomDateRange() {
-            const params = new URLSearchParams(window.location.search);
-            const days = parseInt(params.get('days'), 10);
-            if (!isNaN(days) && days > 0) {
+        function validateInputs() {
+            const token = document.getElementById('token').value; 
+            const author = document.getElementById('author').value;
+            const days = parseInt(document.getElementById('days').value);
+
+            console.log(token, author, days);
+            if (!token || !author || isNaN(days)) {
+                document.getElementById('error-message').textContent = 'Please provide valid GitHub Token, Author, and Days.';
+                return;
+            }
+            updateChart(days, token, author);
+        }
+
+        async function updateChart(days, token, author) {
+            try {
                 const since = new Date();
                 since.setDate(since.getDate() - days);
-                return since;
-            }
-            return null;
-        }
-
-        async function updateChart(timeframe) {
-            const now = new Date();
-            let since;
-            const customSince = getCustomDateRange();
-
-            if (customSince) {
-                since = customSince;
-            } else {
-                switch (timeframe) {
-                    case 'day':
-                        since = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                        break;
-                    case 'week':
-                        since = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
-                        break;
-                    case 'month':
-                        since = new Date(now.getFullYear(), now.getMonth(), 1);
-                        break;
-                    case 'ytd':
-                        since = new Date(now.getFullYear(), 0, 1);
-                        break;
-                    default:
-                        since = new Date(now.getFullYear(), now.getMonth(), 1); // Default to current month
-                        break;
-                }
-            }
-
-            const repos = await fetchUserRepos();
-            const commitData = await Promise.all(repos.map(repo => fetchCommits(repo, since)));
-            const filteredData = commitData.filter(data => data > 0);
-            const filteredRepos = repos.filter((repo, index) => commitData[index] > 0);
-
-            const totalCommits = filteredData.reduce((sum, current) => sum + current, 0); 
-            document.getElementById('totalCommits').textContent = `Total Commits: ${totalCommits}`; 
-
-            if (chartInstance) {
-                chartInstance.destroy();
-            }
-
-            const ctx = document.getElementById('commitChart').getContext('2d');
-            ctx.canvas.height = window.innerHeight - document.getElementById('timeframe').offsetHeight - 20;
-
-            chartInstance = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: filteredRepos,
-                    datasets: [{
-                        label: 'Number of Commits',
-                        data: filteredData,
-                        fill: true,
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                        borderColor: 'rgb(54, 162, 235)',
-                        pointBackgroundColor: 'rgb(54, 162, 235)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgb(54, 162, 235)'
-                    }]
-                },
-                options: {
-                    r: {
-                        beginAtZero: true
+                const repos = await fetchUserRepos(token);
+                const commitData = await Promise.all(repos.map(repo => fetchCommits(repo, since, token, author)));
+                const totalCommits = commitData.reduce((sum, current) => sum + current, 0);
+                document.getElementById('totalCommits').textContent = `Total Commits: ${totalCommits}`;
+                const ctx = document.getElementById('commitChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: repos,
+                        datasets: [{
+                            label: 'Number of Commits',
+                            data: commitData,
+                            fill: true,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgb(54, 162, 235)',
+                            pointBackgroundColor: 'rgb(54, 162, 235)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgb(54, 162, 235)'
+                        }]
                     },
-                    elements: {
-                        line: {
-                            borderWidth: 3
-                        }
-                    },
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        tooltip: {
-                            enabled: true,
-                            mode: 'index',
-                            intersect: false,
-                            callbacks: {
-                                label: function (tooltipItem) {
-                                    let label = tooltipItem.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    label += tooltipItem.parsed.r;
-                                    return label;
-                                },
-                                afterLabel: function (tooltipItem) {
-                                    const repo = tooltipItem.label;
-                                    return `Repository: ${repo}`;
-                                }
+                    options: {
+                        scales: {
+                            r: {
+                                beginAtZero: true
                             }
-                        }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false
                     }
-                }
-            });
+                });
+            } catch (error) {
+                document.getElementById('error-message').textContent = 'Error loading data: ' + error.message;
+            }
         }
-
-        document.getElementById('timeframe').addEventListener('change', (e) => {
-            updateChart(e.target.value);
-        });
-
-        window.onload = () => {
-            const customDateRange = getCustomDateRange();
-            updateChart(customDateRange ? 'custom' : 'ytd');
-        };
     </script>
 </body>
 

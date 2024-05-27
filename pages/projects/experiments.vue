@@ -7,6 +7,7 @@
         <ul>
           <li><nuxt-link to="/experiments/prompts/index.html">Prompting Library</nuxt-link></li>
           <li><a href="https://tasks.davehague.com/">Task Prioritizer</a></li>
+          <li><nuxt-link to="/experiments/github-stats/index.html">Github Stats</nuxt-link></li>
         </ul>
       </section>
     </main>
