@@ -8,6 +8,7 @@
           <li><a href="/experiments/prompts/index.html">Prompting Library</a></li>
           <li><a href="https://tasks.davehague.com/">Task Prioritizer</a></li>
           <li><a href="/experiments/github-stats/index.html">Github Stats</a></li>
+          <li><a href="#">Chase Offers Script</a></li>
         </ul>
       </section>
     </main>
