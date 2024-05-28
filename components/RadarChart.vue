@@ -10,7 +10,12 @@
       <option value="week">7 days</option>
       <option value="day">1 day</option>
     </select>
-    <canvas ref="commitChart"></canvas>
+    <div v-if="isLoading" class="loading-spinner">
+      <div class="spinner"></div>
+    </div>
+    <div v-else class="canvas-wrapper">
+      <canvas ref="commitChart"></canvas>
+    </div>
   </div>
 </template>
 
@@ -24,10 +29,10 @@ export default defineComponent({
   name: 'RadarChart',
   setup() {
     const commitChart = ref<HTMLCanvasElement | null>(null);
-    const timeframe = ref('week');
+    const timeframe = ref('month');
     let chartInstance: Chart | null = null;
     const totalCommits = ref('');
-
+    const isLoading = ref(false);
 
     const fetchUserRepos = async (since: string): Promise<string[]> => {
       try {
@@ -58,6 +63,7 @@ export default defineComponent({
     };
 
     const updateChart = async () => {
+      isLoading.value = true;
       const now = new Date();
       let since: Date;
       switch (timeframe.value) {
@@ -90,7 +96,7 @@ export default defineComponent({
           break;
         default:
           since = new Date(now);
-          since.setDate(now.getDate() - 7);
+          since.setDate(now.getDate() - 30);
           break;
       }
 
@@ -144,6 +150,8 @@ export default defineComponent({
           });
         }
       }
+
+      isLoading.value = false;
     };
 
     onMounted(() => {
@@ -158,7 +166,8 @@ export default defineComponent({
       commitChart,
       timeframe,
       updateChart,
-      totalCommits
+      totalCommits,
+      isLoading
     };
   }
 });
@@ -179,5 +188,31 @@ select {
 canvas {
   width: 100% !important;
   height: calc(70vh - 60px) !important;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(70vh - 60px);
+}
+
+.spinner {
+  border: 16px solid #f3f3f3;
+  border-top: 16px solid #3498db;
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

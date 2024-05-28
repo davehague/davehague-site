@@ -5,9 +5,9 @@
       <section>
         <h1>Other Little Experiments</h1>
         <ul>
-          <li><nuxt-link to="/experiments/prompts/index.html">Prompting Library</nuxt-link></li>
+          <li><a href="/experiments/prompts/index.html">Prompting Library</a></li>
           <li><a href="https://tasks.davehague.com/">Task Prioritizer</a></li>
-          <li><nuxt-link to="/experiments/github-stats/index.html">Github Stats</nuxt-link></li>
+          <li><a href="/experiments/github-stats/index.html">Github Stats</a></li>
         </ul>
       </section>
     </main>

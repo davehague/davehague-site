@@ -10,7 +10,7 @@
             <nuxt-link to="/projects/promptblocks">PromptBlocks</nuxt-link>
             <nuxt-link to="/projects/jobscraper">JobScraper</nuxt-link>
             <nuxt-link to="/projects/podcast">The AI Daily Longread Podcast</nuxt-link>
-            <nuxt-link to="/projects/experiments">Other Experimental Projects</nuxt-link>
+            <nuxt-link to="/projects/experiments">Other Experiments</nuxt-link>
           </div>
         </li>
         <li><nuxt-link to="/about">About Me</nuxt-link></li>
