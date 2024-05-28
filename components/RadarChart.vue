@@ -3,9 +3,12 @@
     <h2>Total commits: {{ totalCommits }}</h2>
     <select v-model="timeframe" @change="updateChart">
       <option value="ytd">Year to Date</option>
-      <option value="month">Current Month</option>
-      <option value="week">Current Week</option>
-      <option value="day">Today</option>
+      <option value="quarter">120 days</option>
+      <option value="ninety">90 days</option>
+      <option value="sixty">90 days</option>
+      <option value="month">30 days</option>
+      <option value="week">7 days</option>
+      <option value="day">1 day</option>
     </select>
     <canvas ref="commitChart"></canvas>
   </div>
@@ -59,19 +62,35 @@ export default defineComponent({
       let since: Date;
       switch (timeframe.value) {
         case 'day':
-          since = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          since = new Date(now);
+          since.setDate(now.getDate() - 1);
           break;
         case 'week':
-          since = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+          since = new Date(now);
+          since.setDate(now.getDate() - 7);
           break;
         case 'month':
-          since = new Date(now.getFullYear(), now.getMonth(), 1);
+          since = new Date(now);
+          since.setDate(now.getDate() - 30);
+          break;
+        case 'sixty':
+          since = new Date(now);
+          since.setDate(now.getDate() - 60);
+          break;
+        case 'ninety':
+          since = new Date(now);
+          since.setDate(now.getDate() - 90);
+          break;
+        case 'quarter':
+          since = new Date(now);
+          since.setDate(now.getDate() - 120);
           break;
         case 'ytd':
           since = new Date(now.getFullYear(), 0, 1);
           break;
         default:
-          since = new Date(now.getFullYear(), 0, 1);
+          since = new Date(now);
+          since.setDate(now.getDate() - 7);
           break;
       }
 
@@ -111,7 +130,7 @@ export default defineComponent({
                 r: {
                   beginAtZero: true,
                   ticks: {
-                    stepSize: 1,
+                    stepSize: 2,
                   },
                 }
               },
@@ -150,7 +169,7 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 70vh;
+  height: calc(70vh - 60px);
 }
 
 select {
@@ -158,7 +177,7 @@ select {
 }
 
 canvas {
-  width: 100%;
-  height: calc(70vh - 60px);
+  width: 100% !important;
+  height: calc(70vh - 60px) !important;
 }
 </style>
