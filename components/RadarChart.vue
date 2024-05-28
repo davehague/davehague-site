@@ -22,7 +22,7 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted, watch } from 'vue';
 import { Chart, RadarController, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend } from 'chart.js';
-import { getCachedCommits, saveCommitsToIndexedDB } from '@/assets/helpers/indexedDBHelper';
+import { getCachedCommits, saveCommitsToIndexedDB, clearCache, isCacheValid, setLastPulledDate } from '@/assets/helpers/indexedDBHelper';
 
 Chart.register(RadarController, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
 
@@ -59,9 +59,6 @@ export default defineComponent({
           if (cachedData && cachedData.length > 0) {
             return cachedData.length;
           }
-          else {
-            return 0;
-          }
         }
 
         console.log('Fetching from API for repo ', repo, ' since ', since.toISOString());
@@ -79,6 +76,7 @@ export default defineComponent({
         return 0;
       }
     };
+
 
     const updateChart = async () => {
       isLoading.value = true;
@@ -180,12 +178,25 @@ export default defineComponent({
 
     onMounted(async () => {
       isLoading.value = true;
+      if (!isCacheValid()) {
+        console.log('Cache is older than 24 hours, clearing')
+        await clearCache();
+        setLastPulledDate();
+      }
       updateChart();
       isLoading.value = false;
     });
 
+
     watch(timeframe, async () => {
-      await updateChart();
+      isLoading.value = true;
+      if (!isCacheValid()) {
+        console.log('Cache is older than 24 hours, clearing')
+        await clearCache();
+        setLastPulledDate();
+      }
+      updateChart();
+      isLoading.value = false;
     });
 
     return {
