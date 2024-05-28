@@ -79,7 +79,7 @@ export const isCacheValid = (): boolean => {
 
 export const getCachedCommits = async (
   repo: string,
-  since: Date
+  since: Date = new Date(new Date().setDate(new Date().getDate() - 120))
 ): Promise<CommitEntry[] | null> => {
   const db = await openDB();
   const transaction = db.transaction(storeName, "readonly");

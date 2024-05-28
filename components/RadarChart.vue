@@ -2,7 +2,6 @@
   <div class="chart-container">
     <h2>Total commits: {{ totalCommits }}</h2>
     <select v-model="timeframe" @change="updateChart">
-      <option value="ytd">Year to Date</option>
       <option value="quarter">120 days</option>
       <option value="ninety">90 days</option>
       <option value="sixty">60 days</option>
@@ -51,14 +50,11 @@ export default defineComponent({
 
     const fetchCommitCount = async (repo: string, since: Date): Promise<number> => {
       try {
-        let days = (new Date().getTime() - since.getTime()) / (1000 * 60 * 60 * 24);
-        if (Math.round(days) > 7) {
-          console.log('Fetching from cache for repo ', repo, ' since ', since.toISOString());
-          const cachedData = await getCachedCommits(repo, since);
+        console.log('Fetching from cache for repo ', repo);
+        const cachedData = await getCachedCommits(repo);
 
-          if (cachedData && cachedData.length > 0) {
-            return cachedData.length;
-          }
+        if (cachedData && cachedData.length > 0) {
+          return cachedData.length;
         }
 
         console.log('Fetching from API for repo ', repo, ' since ', since.toISOString());
@@ -67,9 +63,8 @@ export default defineComponent({
           throw new Error(`Failed to fetch commits for repo ${repo}`);
         }
         const data = await response.json();
-        if (days > 7) {
-          await saveCommitsToIndexedDB(data);
-        }
+        await saveCommitsToIndexedDB(data);
+
         return data.length;
       } catch (error) {
         console.error('Error fetching commits:', error);
@@ -107,9 +102,6 @@ export default defineComponent({
           case 'quarter':
             since = new Date(now);
             since.setDate(now.getDate() - 120);
-            break;
-          case 'ytd':
-            since = new Date(now.getFullYear(), 0, 1);
             break;
           default:
             since = new Date(now);
