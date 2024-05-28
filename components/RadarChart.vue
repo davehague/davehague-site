@@ -52,7 +52,6 @@ export default defineComponent({
     const fetchCommitCount = async (repo: string, since: Date): Promise<number> => {
       try {
         let days = (new Date().getTime() - since.getTime()) / (1000 * 60 * 60 * 24);
-        console.log('Days since:', days); 
         if (Math.round(days) > 7) {
           console.log('Fetching from cache for repo ', repo, ' since ', since.toISOString());
           const cachedData = await getCachedCommits(repo, since);
