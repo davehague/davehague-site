@@ -29,7 +29,7 @@ export default defineComponent({
   name: 'RadarChart',
   setup() {
     const commitChart = ref<HTMLCanvasElement | null>(null);
-    const timeframe = ref('month');
+    const timeframe = ref('quarter');
     let chartInstance: Chart | null = null;
     const totalCommits = ref('');
     const isLoading = ref(false);
@@ -51,14 +51,19 @@ export default defineComponent({
     const fetchCommitCount = async (repo: string, since: Date): Promise<number> => {
       try {
         console.log('Fetching from cache for repo ', repo);
-        const cachedData = await getCachedCommits(repo);
+        const cachedData = await getCachedCommits(repo, since);
 
         if (cachedData && cachedData.length > 0) {
           return cachedData.length;
         }
 
-        console.log('Fetching from API for repo ', repo, ' since ', since.toISOString());
-        const response = await fetch(`/api/github/commits?repo=${repo}&since=${since.toISOString()}`);
+        // default to 120 days if we're going to the API
+        const now = new Date();
+        let defaultSince = new Date(now);
+        defaultSince.setDate(now.getDate() - 120);
+
+        console.log('Fetching from API for repo ', repo, ' since ', defaultSince);
+        const response = await fetch(`/api/github/commits?repo=${repo}&since=${defaultSince.toISOString()}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch commits for repo ${repo}`);
         }
@@ -114,7 +119,8 @@ export default defineComponent({
         const filteredData = commitData.filter((data) => data > 0);
         const filteredRepos = repos.filter((repo, index) => commitData[index] > 0);
         totalCommits.value = filteredData.reduce((acc, curr) => acc + curr, 0).toString();
-
+        const stepSize = Math.ceil(Math.max(...filteredData) / 5);
+        
         if (chartInstance) {
           chartInstance.destroy();
         }
@@ -143,7 +149,7 @@ export default defineComponent({
                   r: {
                     beginAtZero: true,
                     ticks: {
-                      stepSize: 2,
+                      stepSize: stepSize
                     },
                   }
                 },
