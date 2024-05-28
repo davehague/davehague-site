@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, watch, nextTick } from 'vue';
+import { defineComponent, ref, onMounted, watch } from 'vue';
 import { Chart, RadarController, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend } from 'chart.js';
 import { getCachedCommits, saveCommitsToIndexedDB } from '@/assets/helpers/indexedDBHelper';
 
@@ -52,7 +52,9 @@ export default defineComponent({
     const fetchCommitCount = async (repo: string, since: Date): Promise<number> => {
       try {
         let days = (new Date().getTime() - since.getTime()) / (1000 * 60 * 60 * 24);
-        if (days > 7) {
+        console.log('Days since:', days); 
+        if (Math.round(days) > 7) {
+          console.log('Fetching from cache for repo ', repo, ' since ', since.toISOString());
           const cachedData = await getCachedCommits(repo, since);
 
           if (cachedData && cachedData.length > 0) {
@@ -61,9 +63,9 @@ export default defineComponent({
           else {
             return 0;
           }
-
         }
 
+        console.log('Fetching from API for repo ', repo, ' since ', since.toISOString());
         const response = await fetch(`/api/github/commits?repo=${repo}&since=${since.toISOString()}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch commits for repo ${repo}`);
@@ -72,7 +74,6 @@ export default defineComponent({
         if (days > 7) {
           await saveCommitsToIndexedDB(data);
         }
-        console.log(data);
         return data.length;
       } catch (error) {
         console.error('Error fetching commits:', error);
@@ -81,7 +82,6 @@ export default defineComponent({
     };
 
     const updateChart = async () => {
-      console.log('Updating chart');
       isLoading.value = true;
       try {
         const now = new Date();
@@ -127,14 +127,11 @@ export default defineComponent({
         totalCommits.value = filteredData.reduce((acc, curr) => acc + curr, 0).toString();
 
         if (chartInstance) {
-          console.log('Destroying existing chart');
           chartInstance.destroy();
         }
 
-        console.log("Do we have a HTMLCanvasElement yet? ", commitChart.value);
         if (commitChart.value) {
           const ctx = commitChart.value.getContext('2d');
-          console.log('Found context: ', ctx);
           if (ctx) {
             chartInstance = new Chart(ctx, {
               type: 'radar',
@@ -184,14 +181,12 @@ export default defineComponent({
 
     onMounted(async () => {
       isLoading.value = true;
-      await nextTick();
-      await updateChart();
+      updateChart();
       isLoading.value = false;
     });
 
-    watch(timeframe, () => {
-      console.log('Timeframe changed, ', timeframe.value);
-      updateChart();
+    watch(timeframe, async () => {
+      await updateChart();
     });
 
     return {
