@@ -4,12 +4,6 @@ export default defineNuxtConfig({
   },
   css: ["~/assets/styles.css"],
   plugins: ['~/plugins/analytics.client.ts'],
-  runtimeConfig: {
-    public: {
-      SUPABASE_URL: process.env.SUPABASE_URL,
-      SUPABASE_KEY: process.env.SUPABASE_KEY,
-    }
-  },
   ignore: ["experiments", "posts"],
   app: {
     head: {

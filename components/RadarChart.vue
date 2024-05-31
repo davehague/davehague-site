@@ -29,7 +29,7 @@ export default defineComponent({
   name: 'RadarChart',
   setup() {
     const commitChart = ref<HTMLCanvasElement | null>(null);
-    const timeframe = ref('quarter');
+    const timeframe = ref('day');
     let chartInstance: Chart | null = null;
     const totalCommits = ref('');
     const isLoading = ref(false);
@@ -60,7 +60,7 @@ export default defineComponent({
         // default to 120 days if we're going to the API
         const now = new Date();
         let defaultSince = new Date(now);
-        defaultSince.setDate(now.getDate() - 120);
+        defaultSince.setDate(now.getDate() - 1);
 
         console.log('Fetching from API for repo ', repo, ' since ', defaultSince);
         const response = await fetch(`/api/github/commits?repo=${repo}&since=${defaultSince.toISOString()}`);
