@@ -17,28 +17,7 @@ import SiteHeader from '@/components/SiteHeader.vue'
 import SiteFooter from '@/components/SiteFooter.vue'
 import RadarChart from '@/components/RadarChart.vue'
 import { supabase } from "@/utils/supabaseClient";
-
-
-interface GitHubRepo {
-  id: number;
-  name: string;
-  full_name: string;
-  owner: string;
-  html_url: string;
-  updated_at: string;
-  pushed_at: string;
-}
-
-interface GitHubCommit {
-  commit_id: number;
-  author_name: string;
-  author_username: string;
-  author_email: string;
-  author_date: Date;
-  message: string;
-  html_url: string;
-}
-
+import { type GitHubRepo, type GitHubCommit } from '@/types/interfaces';
 
 export default defineComponent({
   components: {

@@ -21,7 +21,8 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted, watch } from 'vue';
 import { Chart, RadarController, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend } from 'chart.js';
-import { getCachedCommits, saveCommitsToIndexedDB, clearCache, isCacheValid, setLastPulledDate } from '@/assets/helpers/indexedDBHelper';
+import { type GitHubRepo } from '@/types/interfaces';
+import { supabase } from "@/utils/supabaseClient";
 
 Chart.register(RadarController, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
 
@@ -29,52 +30,38 @@ export default defineComponent({
   name: 'RadarChart',
   setup() {
     const commitChart = ref<HTMLCanvasElement | null>(null);
-    const timeframe = ref('day');
+    const timeframe = ref('week');
     let chartInstance: Chart | null = null;
     const totalCommits = ref('');
     const isLoading = ref(false);
 
-    const fetchUserRepos = async (since: string): Promise<string[]> => {
-      try {
-        const response = await fetch(`/api/github/repos?since=${encodeURIComponent(since)}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch repositories');
-        }
-        const data = await response.json();
-        return data.map((repo: { full_name: string }) => repo.full_name);
-      } catch (error) {
+    const fetchUserRepos = async (since: string): Promise<GitHubRepo[]> => {
+      const { data, error } = await supabase
+        .from('github_repos')
+        .select('*')
+        .gte('pushed_at', since);
+
+      if (error) {
         console.error('Error fetching repositories:', error);
         return [];
       }
+
+      return data as GitHubRepo[];
     };
 
-    const fetchCommitCount = async (repo: string, since: Date): Promise<number> => {
-      try {
-        console.log('Fetching from cache for repo ', repo);
-        const cachedData = await getCachedCommits(repo, since);
+    const fetchCommitCount = async (repo: GitHubRepo, since: Date): Promise<number> => {
+      const { data, error } = await supabase
+        .from('github_commits')
+        .select('count', { count: 'exact' })
+        .eq('repo_id', repo.id)
+        .gte('author_date', since.toISOString());
 
-        if (cachedData && cachedData.length > 0) {
-          return cachedData.length;
-        }
-
-        // default to 120 days if we're going to the API
-        const now = new Date();
-        let defaultSince = new Date(now);
-        defaultSince.setDate(now.getDate() - 1);
-
-        console.log('Fetching from API for repo ', repo, ' since ', defaultSince);
-        const response = await fetch(`/api/github/commits?repo=${repo}&since=${defaultSince.toISOString()}`);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch commits for repo ${repo}`);
-        }
-        const data = await response.json();
-        await saveCommitsToIndexedDB(data);
-
-        return data.length;
-      } catch (error) {
-        console.error('Error fetching commits:', error);
+      if (error) {
+        console.error('Error fetching commit count:', error);
         return 0;
       }
+
+      return data ? data[0].count : 0;
     };
 
 
@@ -115,12 +102,17 @@ export default defineComponent({
         }
 
         const repos = await fetchUserRepos(since.toISOString());
-        const commitData = await Promise.all(repos.map((repo: string) => fetchCommitCount(repo, since)));
+        console.log('Charting repos:', repos);
+
+        const commitData = await Promise.all(repos.map((repo: GitHubRepo) => fetchCommitCount(repo, since)));
+
         const filteredData = commitData.filter((data) => data > 0);
         const filteredRepos = repos.filter((repo, index) => commitData[index] > 0);
+        const filteredRepoNames = filteredRepos.map(repo => repo.name);
+
         totalCommits.value = filteredData.reduce((acc, curr) => acc + curr, 0).toString();
         const stepSize = Math.ceil(Math.max(...filteredData) / 5);
-        
+
         if (chartInstance) {
           chartInstance.destroy();
         }
@@ -128,10 +120,39 @@ export default defineComponent({
         if (commitChart.value) {
           const ctx = commitChart.value.getContext('2d');
           if (ctx) {
+            const labelClickPlugin = {
+              id: 'labelClick',
+              afterEvent(chart: any, args: any) {
+                const event = args.event;
+                if (event.type === 'click') {
+                  console.log('Click event:', event);
+                  const { ctx, scales: { r } } = chart;
+                  const { x, y } = event;
+                  const angleStep = (2 * Math.PI) / chart.data.labels.length;
+
+                  chart.data.labels.forEach((label: string, index: number) => {
+                    const angle = angleStep * index - Math.PI / 2;
+                    const xLabel = r.xCenter + Math.cos(angle) * r.drawingArea;
+                    const yLabel = r.yCenter + Math.sin(angle) * r.drawingArea;
+
+                    const distance = Math.sqrt((x - xLabel) ** 2 + (y - yLabel) ** 2);
+
+                    console.log('Distance to label:', label, distance);
+                    if (distance < 50) {
+                      const repo = filteredRepos.find(repo => repo.name === label);
+                      if (repo) {
+                        window.open(repo.html_url, '_blank');
+                      }
+                    }
+                  });
+                }
+              }
+            };
+
             chartInstance = new Chart(ctx, {
               type: 'radar',
               data: {
-                labels: filteredRepos,
+                labels: filteredRepoNames,
                 datasets: [{
                   label: 'Number of Commits',
                   data: filteredData,
@@ -151,6 +172,13 @@ export default defineComponent({
                     ticks: {
                       stepSize: stepSize
                     },
+                    pointLabels: {
+                      color: '#00468c',
+                      font: {
+                        size: 14,
+                        weight: 'lighter',
+                      }
+                    }
                   }
                 },
                 maintainAspectRatio: false,
@@ -159,7 +187,8 @@ export default defineComponent({
                     borderWidth: 3
                   }
                 }
-              }
+              },
+              plugins: [labelClickPlugin]
             });
           }
         }
@@ -176,23 +205,12 @@ export default defineComponent({
 
     onMounted(async () => {
       isLoading.value = true;
-      if (!isCacheValid()) {
-        console.log('Cache is older than 24 hours, clearing')
-        await clearCache();
-        setLastPulledDate();
-      }
       updateChart();
       isLoading.value = false;
     });
 
-
     watch(timeframe, async () => {
       isLoading.value = true;
-      if (!isCacheValid()) {
-        console.log('Cache is older than 24 hours, clearing')
-        await clearCache();
-        setLastPulledDate();
-      }
       updateChart();
       isLoading.value = false;
     });
