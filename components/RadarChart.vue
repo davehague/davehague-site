@@ -2,13 +2,15 @@
   <div class="chart-container">
     <h2>Total commits: {{ totalCommits }}</h2>
     <select v-model="timeframe" @change="updateChart">
-      <option value="quarter">120 days</option>
+      <option value="hundred-twenty">120 days</option>
       <option value="ninety">90 days</option>
       <option value="sixty">60 days</option>
-      <option value="month">30 days</option>
-      <option value="week">7 days</option>
-      <option value="day">1 day</option>
+      <option value="thirty">30 days</option>
+      <option value="seven">7 days</option>
+      <option value="one">1 day</option>
     </select>
+    <button title="Give me a summary of this timeframe, based on the commits" class="tldr-link"
+      @click="emitTimeframe">tl;dr</button>
     <div v-if="isLoading" class="loading-spinner">
       <div class="spinner"></div>
     </div>
@@ -19,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, watch } from 'vue';
+import { defineComponent, ref, onMounted, watch, defineEmits } from 'vue';
 import { Chart, RadarController, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend } from 'chart.js';
 import { type GitHubRepo } from '@/types/interfaces';
 import { supabase } from "@/utils/supabaseClient";
@@ -28,14 +30,47 @@ Chart.register(RadarController, RadialLinearScale, PointElement, LineElement, Fi
 
 export default defineComponent({
   name: 'RadarChart',
-  setup() {
+  emits: ['timeframe'],
+  setup(_, { emit }) {
     const commitChart = ref<HTMLCanvasElement | null>(null);
-    const timeframe = ref('week');
+    const timeframe = ref('seven');
     let chartInstance: Chart | null = null;
     const totalCommits = ref('');
     const isLoading = ref(false);
 
+    const passedInSince = ref('');
+
+    const emitTimeframe = async () => {
+      const { data, error } = await supabase
+        .from('github_commits')
+        .select('message')
+        .gte('author_date', passedInSince.value);
+
+      if (error) {
+        console.error('Error fetching commits:', error);
+        return;
+      }
+
+      console.log('All messages:', data);
+
+      let allMessages = data.map((commit: any) => commit.message).join('\n');
+
+      let timeframeInt = 30;
+      switch (timeframe.value) {
+        case 'one': timeframeInt = 1; break;
+        case 'seven': timeframeInt = 7; break;
+        case 'thirty': timeframeInt = 30; break;
+        case 'sixty': timeframeInt = 60; break;
+        case 'ninety': timeframeInt = 90; break;
+        case 'hundred-twenty': timeframeInt = 120; break;
+        default: timeframeInt = 1; break;
+      };
+
+      emit('timeframe', timeframeInt, allMessages);
+    };
+
     const fetchUserRepos = async (since: string): Promise<GitHubRepo[]> => {
+      passedInSince.value = since;
       const { data, error } = await supabase
         .from('github_repos')
         .select('*')
@@ -71,15 +106,15 @@ export default defineComponent({
         const now = new Date();
         let since: Date;
         switch (timeframe.value) {
-          case 'day':
+          case 'one':
             since = new Date(now);
             since.setDate(now.getDate() - 1);
             break;
-          case 'week':
+          case 'seven':
             since = new Date(now);
             since.setDate(now.getDate() - 7);
             break;
-          case 'month':
+          case 'thirty':
             since = new Date(now);
             since.setDate(now.getDate() - 30);
             break;
@@ -91,7 +126,7 @@ export default defineComponent({
             since = new Date(now);
             since.setDate(now.getDate() - 90);
             break;
-          case 'quarter':
+          case 'hundred-twenty':
             since = new Date(now);
             since.setDate(now.getDate() - 120);
             break;
@@ -220,7 +255,8 @@ export default defineComponent({
       timeframe,
       updateChart,
       totalCommits,
-      isLoading
+      isLoading,
+      emitTimeframe
     };
   }
 });
@@ -241,6 +277,15 @@ select {
 canvas {
   width: 100% !important;
   height: calc(70vh - 60px) !important;
+}
+
+.tldr-link {
+  background: none;
+  border: none;
+  color: #555;
+  cursor: pointer;
+  margin-bottom: 20px;
+  text-decoration: underline;
 }
 
 .loading-spinner {
