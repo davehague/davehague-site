@@ -1,4 +1,7 @@
 {
   "extends": "../.nuxt/tsconfig.server.json",
+  "exclude": [
+    "../public/experiments/prompts/main.js",
+    "../public/experiments/prompts/storage.js"
+  ]
 }
-

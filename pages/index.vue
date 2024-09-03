@@ -1,75 +1,115 @@
 <template>
-  <div class="content">
-    <site-header />
+  <div class="min-h-screen bg-gray-100 text-gray-800">
+    <header class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md">
+      <nav class="container mx-auto px-6 py-3">
+        <ul class="flex justify-center space-x-8">
+          <li v-for="item in navItems" :key="item.id">
+            <a :href="`#${item.id}`" class="text-lg font-medium hover:text-blue-600 transition-colors duration-300">{{
+              item.name }}</a>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
     <main>
-      <section id="home">
-        <h2>Just launched! The <a href="https://jobs.davehague.com">The Jobs App</a></h2>
-        <img src="/images/jobs-app.gif " width="1200" height="600" alt="The Jobs App" />
-        <div v-html="renderedContent"></div>
+      <section id="hero" class="min-h-screen flex items-center justify-center bg-gray-200">
+        <div class="text-center">
+          <div class="mb-8">
+            <img src="../public/android-chrome-512x512.png" alt="Your Name"
+              class="rounded-full w-48 h-48 mx-auto border-4 border-white shadow-lg" />
+          </div>
+          <h1 class="text-5xl font-bold mb-4 text-gray-900">Dave Hague</h1>
+          <p class="text-xl mb-8 text-gray-700">Python & TypeScript Developer | AI Enthusiast</p>
+          <a href="#projects"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition-colors duration-300">
+            View My Work
+          </a>
+        </div>
+      </section>
+
+      <section id="about" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+          <h2 class="text-3xl font-bold mb-8 text-gray-900">About Me</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div>
+              <p class="text-lg mb-4 text-gray-700">
+                I'm a seasoned developer with a passion for building software, currently focused on Python and TypeScript.  
+                As a former .NET developer and engineering leader I bring a diverse skill set to every project.  
+                I haven't yet seen a hat I'm unwilling or unable to put on.
+              </p>
+              <p class="text-lg text-gray-700">
+                Recently, I've embarked on a journey of entrepreneurship, which means I'm working on my shipping muscle while I explore the
+                exciting world of generative AI and building solutions that solve real problems.
+              </p>
+              <p class="text-lg mt-4 text-gray-700">
+                I live in central Ohio with my wife, dog, and toddler, and I love to write software. 
+                When I'm not coding, you can find me spending time with my family, reading, or playing pickleball.
+              </p>
+            </div>
+            <div class="space-y-4">
+              <h3 class="text-xl font-semibold text-gray-900">Core Technologies</h3>
+              <ul class="grid grid-cols-2 gap-2">
+                <li v-for="tech in technologies" :key="tech"
+                  class="bg-gray-200 rounded-full px-3 py-1 text-sm text-gray-700">
+                  {{ tech }}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <ProjectsSection />
+
+      <BlogSection />
+
+      <section id="contact" class="py-20 bg-gray-200">
+        <div class="container mx-auto px-6 text-center">
+          <h2 class="text-3xl font-bold mb-8 text-gray-900">Get in Touch</h2>
+          <p class="text-xl mb-8 text-gray-700">Interested in collaborating or just want to say hi? Feel free to reach
+            out!</p>
+          <a href="contact"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition-colors duration-300">
+            Send me an email
+          </a>
+          <div class="mt-8 flex justify-center space-x-6">
+            <a v-for="social in socialLinks" :key="social.name" :href="social.url" target="_blank"
+              rel="noopener noreferrer" class="text-gray-600 hover:text-blue-600 transition-colors duration-300">
+              <component :is="social.icon" class="h-8 w-8" />
+            </a>
+          </div>
+        </div>
       </section>
     </main>
-    <site-footer />
+
+    <footer class="bg-gray-300 py-6">
+      <div class="container mx-auto px-6 text-center text-gray-700">
+        <p>&copy; {{ new Date().getFullYear() }} Dave Hague. All rights reserved.</p>
+      </div>
+    </footer>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
-import { marked } from 'marked';
-import SiteHeader from '@/components/SiteHeader.vue';
-import SiteFooter from '@/components/SiteFooter.vue';
-
-export default defineComponent({
-  components: {
-    SiteHeader,
-    SiteFooter
-  },
-  setup() {
-    const content = `
-Job searching sucks! I decided to do something about it. If you're in the job market or know someone who is, I'd love for you to try out my new AI-powered job matching tool!
-Hi all, I've been working on something I'm "soft launching" for friends and family today. This project started exactly one month ago today. My brother was looking for a job and I wanted to help him out. So I started building a job aggregator to search for jobs and only show him the most relevant ones according to his resume (using the power of AI with large language models).
-My premise and features:
-- You've got to apply fast!  It searches for jobs for you three times per day, so when you see them (and get notified via email) you'll be in the first set of candidates for the job.
-- Get to the point! I've used AI to standardize all jobs to have the salary listed, a short summary, and a short list of requirements. If you still like the job after that, you can go read the full posting, if you want to dig deeper into the company, their values, their history, etc.  Or just APPLY!
-- TL;DR Just tell me if it's good (rate it for me). The app will (very unscientifically) rate the job as a match specifically FOR YOU based on:
-     - How you might rate this job on a scale from 1 to 100 for desirability
-     - How you might rate this job on a scale from 1 to 100 for experience match
-     - How the hiring manager might rate you from 1 to 100 on skills match
-     - How the hiring manager might rate you on a scale from 1 to 100 for experience match
-     - An overall match score, tailored for your resume and desired job preferences
-- Emails!  You can get emailed immediately when new jobs are posted, once a day with a summary of jobs, or not at all (just come try out the site and see if you like it)
-
-You can find all of this at https://jobs.davehague.com/ 
-
-If you find this tool useful or know someone who could benefit from it, please sign up and share it with them. As an early adopter, your feedback is invaluable! I'm eager to hear your ideas for cool features and any pain points you experience while using the app. My goal is to create a product that genuinely helps people find BETTER jobs FASTER. Please reach out with your suggestions and stories via Facebook, Discord (link in the comments), or your preferred method. Together, we can build something amazing!
-Thanks, and happy job hunting!
+<script setup>
+import { ref } from 'vue'
+import { GithubIcon, TwitterIcon, LinkedinIcon } from 'lucide-vue-next'
 
 
-## Why this site?
-Oh, ideas. My brain is full of them. There's never enough time to build all of the things I want to see in the world, and they range from websites and mobile apps to physical products, books, gardening hacks, and more. It's challenging to keep them all straight, and even more challenging to keep them prioritized. I even wrote a little [Task Prioritizer](https://www.davehague.com/projects/experiments#tasks) to help me figure out which one to take on next. Historically it's been a challenge to finish those projects and bring them "to market". My commitment to you, dear reader, through this website is to finish those projects, one by one.
+const navItems = [
+  { id: 'about', name: 'About' },
+  { id: 'projects', name: 'Projects' },
+  { id: 'blog', name: 'Blog' },
+  { id: 'contact', name: 'Contact' },
+]
 
-In general, I'm following this strategy with my projects:
+const technologies = [
+  'Python', 'TypeScript', 'Vue.js', 'Nuxt', 'FastAPI',
+  'Supabase', 'PocketBase', 'Google Cloud Platform', 'AI/ML',
+]
 
-1. Build things I want to see in the world 
-2. Share what I've built with others, solve their problems as well. Give value away for free.
-3. If enough people ~~like~~ LOVE it, maybe I'm on to something and that's a sign that it needs more support and dedication.
-
-So, follow along, try one of my solutions if you've got the same problem as me, and give me some feedback ([LinkedIn](https://www.linkedin.com/in/david-hague-developer/) is a good place to find me).`;
-
-    const renderedContent = ref('');
-
-    onMounted(async () => {
-      try {
-        renderedContent.value = await marked.parse(content);
-      } catch (error) {
-        console.error('Error parsing markdown content', error);
-      }
-    });
-
-    return {
-      renderedContent
-    };
-  }
-});
+const socialLinks = [
+  { name: 'GitHub', icon: GithubIcon, url: 'https://github.com/davehague' },
+  { name: 'Twitter', icon: TwitterIcon, url: 'https://twitter.com/getdavehague' },
+  { name: 'LinkedIn', icon: LinkedinIcon, url: 'https://www.linkedin.com/in/david-hague-developer/' },
+]
 </script>
-
-<style scoped></style>
