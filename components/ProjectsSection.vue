@@ -3,7 +3,8 @@
     <div class="container mx-auto px-6">
       <h2 class="text-3xl font-bold mb-8 text-gray-900">Projects</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div v-for="project in projects" :key="project.id" class="bg-white rounded-lg overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105">
+        <div v-for="project in projects" :key="project.id"
+          class="bg-white rounded-lg overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105">
           <img :src="project.image" :alt="project.name" class="w-full h-48 object-cover" />
           <div class="p-6">
             <h3 class="text-xl font-semibold mb-2 text-gray-900">{{ project.name }}</h3>
@@ -23,6 +24,13 @@ import { ref } from 'vue'
 
 const projects = ref([
 {
+    id: 5,
+    name: 'Commission Controls',
+    description: 'Track and reconcile insurance commissions with your book of business.',
+    image: 'images/commission-control.png?height=300&width=400',
+    link: 'https://github.com/davehague/',
+  },
+  {
     id: 4,
     name: 'Prompt Central Station',
     description: 'Decouple prompt management from application code and enable non-technical users to modify prompts and parameters without code changes.',
