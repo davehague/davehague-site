@@ -124,6 +124,7 @@ export default defineComponent({
         .select(`message, github_repos (name)`)
         .gt('author_date', authorDate.toISOString());
 
+      console.log('Commit Data:', data);
       if (error) {
         console.error('Error fetching data:', error);
         return null;
@@ -150,6 +151,14 @@ export default defineComponent({
       const now = new Date();
       let since: Date;
       since = new Date(now);
+
+      
+      const { data: three_commits } = await supabase
+        .from('github_commits')
+        .select('*')
+        .limit(3);
+
+      console.log('Three commits:', three_commits);
 
       const { data: latest_commit } = await supabase
         .from('github_commits')
@@ -181,7 +190,7 @@ export default defineComponent({
 
         const repo_id = (data as any)[0].id;
         commits.value = await fetchCommits(repo.owner, repo.name, since.toISOString());
-        console.log(commits);
+        console.log(commits.value);
 
         for (const commit of commits.value) {
           const { data, error } = await supabase

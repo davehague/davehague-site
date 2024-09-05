@@ -16,7 +16,9 @@
         </button>
       </div>
 
-      <CommitLineChart :timeframe="selectedPeriod" class="mb-12" />
+      <!-- <CommitLineChart :timeframe="selectedPeriod" class="mb-12" /> -->
+      <StackedBarChart :timeframe="selectedPeriod" class="mb-12" />
+
 
       <div v-if="loading" class="text-center">
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
@@ -59,35 +61,12 @@ const projects = ref([])
 const loading = ref(true)
 const selectedPeriod = ref('30')
 
-const timePeriods = [
-  { label: 'Last 7 days', value: '7' },
-  { label: 'Last 30 days', value: '30' },
-  { label: 'Year to date', value: 'ytd' },
-  { label: 'Last 365 days', value: '365' },
-]
-
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
   })
-}
-
-const getStartDate = () => {
-  const now = new Date()
-  switch (selectedPeriod.value) {
-    case '7':
-      return new Date(now.setDate(now.getDate() - 7))
-    case '30':
-      return new Date(now.setDate(now.getDate() - 30))
-    case 'ytd':
-      return new Date(now.getFullYear(), 0, 1)
-    case '365':
-      return new Date(now.setFullYear(now.getFullYear() - 1))
-    default:
-      return new Date(now.setDate(now.getDate() - 30))
-  }
 }
 
 const fetchUserRepos = async (since) => {
@@ -103,11 +82,13 @@ const fetchUserRepos = async (since) => {
   return data;
 };
 
-const fetchCommits = async (repoId) => {
+const fetchCommits = async (repoId, since) => {
+  const sinceUTC = new Date(since).toISOString();
   const { data, error } = await supabase
     .from('github_commits')
     .select('*')
     .eq('repo_id', repoId)
+    .gte('author_date', sinceUTC)
     .order('author_date', { ascending: false })
     .limit(3);
   
@@ -120,16 +101,16 @@ const fetchCommits = async (repoId) => {
 
 const fetchProjects = async () => {
   loading.value = true;
-  const since = getStartDate();
+  const since = getStartDate(selectedPeriod.value);
   const repos = await fetchUserRepos(since.toISOString());
   
   const projectsWithCommits = await Promise.all(repos.map(async (repo) => {
-    const commits = await fetchCommits(repo.id);
+    const commits = await fetchCommits(repo.id, since);
     return { ...repo, commits };
   }));
 
-  // sort projectsWithCommits by pushed_at
-  projectsWithCommits.sort((a, b) => new Date(b.pushed_at) - new Date(a.pushed_at));
+  // order projectsWithCommits by pushed_at date
+  projectsWithCommits.sort((a, b) => new Date(a.pushed_at) - new Date(b.pushed_at));
 
   projects.value = projectsWithCommits;
   loading.value = false;

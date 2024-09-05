@@ -38,10 +38,24 @@ const getStartDate = computed(() => {
   }
 });
 
-const fetchCommits = async () => {
+const fetchRepos = async () => {
+  const { data, error } = await supabase
+    .from('github_repos')
+    .select('id, name')
+    .gte('pushed_at', getStartDate.value.toISOString());
+
+  if (error) {
+    console.error('Error fetching repos:', error);
+    return [];
+  }
+  return data;
+};
+
+const fetchCommits = async (repoId) => {
   const { data, error } = await supabase
     .from('github_commits')
     .select('author_date')
+    .eq('repo_id', repoId)
     .gte('author_date', getStartDate.value.toISOString())
     .order('author_date', { ascending: true });
 
@@ -52,24 +66,30 @@ const fetchCommits = async () => {
   return data;
 };
 
-const prepareChartData = (commits) => {
-  const dateMap = new Map();
+const prepareChartData = (repos, commitsPerRepo) => {
   const startDate = getStartDate.value;
   const endDate = new Date();
+  
+  return repos.map(repo => {
+    const dateMap = new Map();
+    
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      dateMap.set(d.toISOString().split('T')[0], 0);
+    }
 
-  for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-    dateMap.set(d.toISOString().split('T')[0], 0);
-  }
+    commitsPerRepo[repo.id].forEach(commit => {
+      const date = commit.author_date.split('T')[0];
+      dateMap.set(date, (dateMap.get(date) || 0) + 1);
+    });
 
-  commits.forEach(commit => {
-    const date = commit.author_date.split('T')[0];
-    dateMap.set(date, (dateMap.get(date) || 0) + 1);
+    return {
+      label: repo.name,
+      data: Array.from(dateMap).map(([date, count]) => ({ x: new Date(date), y: count }))
+    };
   });
-
-  return Array.from(dateMap).map(([date, count]) => ({ x: new Date(date), y: count }));
 };
 
-const createChart = (chartData) => {
+const createChart = (datasets) => {
   const ctx = chartRef.value.getContext('2d');
   
   if (chart) {
@@ -78,16 +98,7 @@ const createChart = (chartData) => {
 
   chart = new Chart(ctx, {
     type: 'line',
-    data: {
-      datasets: [{
-        label: 'Commits per day',
-        data: chartData,
-        borderColor: 'rgb(59, 130, 246)',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        fill: true,
-        tension: 0.1
-      }]
-    },
+    data: { datasets },
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -119,9 +130,15 @@ const createChart = (chartData) => {
 };
 
 const updateChart = async () => {
-  const commits = await fetchCommits();
-  const chartData = prepareChartData(commits);
-  createChart(chartData);
+  const repos = await fetchRepos();
+  const commitsPerRepo = {};
+  
+  for (const repo of repos) {
+    commitsPerRepo[repo.id] = await fetchCommits(repo.id);
+  }
+
+  const datasets = prepareChartData(repos, commitsPerRepo);
+  createChart(datasets);
 };
 
 onMounted(updateChart);
