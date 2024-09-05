@@ -5,7 +5,7 @@
       <ul class="flex justify-center space-x-8">
         <li v-for="item in navItems" :key="item.id">
           <NuxtLink 
-            :to="item.id === 'contact' ? '/contact' : `/#${item.id}`" 
+            :to="item.link || `/#${item.id}`"
             class="text-lg font-medium hover:text-blue-600 transition-colors duration-300"
           >
             {{ item.name }}
@@ -18,9 +18,10 @@
 
 <script setup>
 const navItems = [
+  { id: 'home', name: 'Home', link: '/' },
   { id: 'about', name: 'About' },
   { id: 'projects', name: 'Projects' },
   { id: 'blog', name: 'Blog' },
-  { id: 'contact', name: 'Contact' },
+  { id: 'stats', name: 'Stats', link: '/stats2' }
 ]
 </script>
