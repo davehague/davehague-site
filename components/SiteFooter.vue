@@ -1,24 +1,14 @@
+<!-- components/SiteFooter.vue -->
 <template>
-  <footer>
-    <p>&copy; 2024 David Hague</p>
+  <footer class="bg-gray-300 py-6">
+    <div class="container mx-auto px-6 text-center text-gray-700">
+      <p>&copy; {{ currentYear }} Dave Hague. All rights reserved.</p>
+    </div>
   </footer>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup>
+import { computed } from 'vue'
 
-export default defineComponent({
-  name: 'SiteFooter'
-})
+const currentYear = computed(() => new Date().getFullYear())
 </script>
-
-<style scoped>
-footer {
-  background-color: #333;
-  color: #fff;
-  text-align: center;
-  padding: 1rem;
-  width: 100%;
-  margin-top: auto;
-}
-</style>

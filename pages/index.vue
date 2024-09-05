@@ -1,16 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-100 text-gray-800">
-    <header class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md">
-      <nav class="container mx-auto px-6 py-3">
-        <ul class="flex justify-center space-x-8">
-          <li v-for="item in navItems" :key="item.id">
-            <a :href="`#${item.id}`" class="text-lg font-medium hover:text-blue-600 transition-colors duration-300">{{
-              item.name }}</a>
-          </li>
-        </ul>
-      </nav>
-    </header>
-
+    <SiteHeader />
     <main>
       <section id="hero" class="min-h-screen flex items-center justify-center bg-gray-200">
         <div class="text-center">
@@ -19,7 +9,7 @@
               class="rounded-full w-48 h-48 mx-auto border-4 border-white shadow-lg" />
           </div>
           <h1 class="text-5xl font-bold mb-4 text-gray-900">Dave Hague</h1>
-          <p class="text-xl mb-8 text-gray-700">Python & TypeScript Developer | AI Enthusiast</p>
+          <p class="text-xl mb-8 text-gray-700">Developer | AI Enthusiast</p>
           <a href="#projects"
             class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition-colors duration-300">
             View My Work
@@ -47,7 +37,7 @@
               </p>
             </div>
             <div class="space-y-4">
-              <h3 class="text-xl font-semibold text-gray-900">Core Technologies</h3>
+              <h3 class="text-xl font-semibold text-gray-900">Most Used Technologies</h3>
               <ul class="grid grid-cols-2 gap-2">
                 <li v-for="tech in technologies" :key="tech"
                   class="bg-gray-200 rounded-full px-3 py-1 text-sm text-gray-700">
@@ -82,16 +72,13 @@
       </section>
     </main>
 
-    <footer class="bg-gray-300 py-6">
-      <div class="container mx-auto px-6 text-center text-gray-700">
-        <p>&copy; {{ new Date().getFullYear() }} Dave Hague. All rights reserved.</p>
-      </div>
-    </footer>
+    <!-- <NuxtLink to="/stats2">Stats</NuxtLink> -->
+
+    <SiteFooter />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
 import { GithubIcon, TwitterIcon, LinkedinIcon } from 'lucide-vue-next'
 
 
@@ -103,8 +90,8 @@ const navItems = [
 ]
 
 const technologies = [
-  'Python', 'TypeScript', 'Vue.js', 'Nuxt', 'FastAPI',
-  'Supabase', 'PocketBase', 'Google Cloud Platform', 'AI/ML',
+  'Vue.js', 'Python',  'Nuxt', 'FastAPI', 'TypeScript', 'LLMs', 
+  'PocketBase', 'Google Cloud Platform', 'Supabase', 'Postgres'
 ]
 
 const socialLinks = [
