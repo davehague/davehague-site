@@ -1,0 +1,193 @@
+// composables/useGithubData.ts
+
+import { ref } from "vue";
+import { supabase } from "@/utils/supabaseClient";
+import { type GitHubRepo, type GitHubCommit } from "@/types/interfaces";
+
+export function useGithubData() {
+  const commits = ref<GitHubCommit[]>([]);
+  const daysBetween = ref(0);
+
+  const fetchUserRepos = async (since: string): Promise<GitHubRepo[]> => {
+    try {
+      const sinceDate = new Date(since);
+      const formattedSince = sinceDate.toISOString();
+      
+      let response;
+      if (import.meta.server) {
+        // Server-side: use GitHub API directly
+        const token = process.env.GITHUB_TOKEN;
+        response = await fetch("https://api.github.com/user/repos", {
+          headers: {
+            Authorization: `token ${token}`,
+            Accept: "application/vnd.github.v3+json",
+          },
+        });
+      } else {
+        // Client-side: use Nuxt API route
+        response = await fetch(`/api/github/repos?since=${encodeURIComponent(formattedSince)}`);
+      }
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch repositories');
+      }
+
+      const data = await response.json();
+      
+      // Filter repos on the server side when using GitHub API directly
+      const filteredData = import.meta.server 
+        ? data.filter((repo: any) => new Date(repo.pushed_at) >= sinceDate)
+        : data;
+
+      return filteredData.map((repo: any) => ({
+        id: repo.id,
+        name: repo.name,
+        full_name: repo.full_name,
+        owner: repo.full_name.split('/')[0],
+        html_url: repo.html_url,
+        updated_at: repo.updated_at,
+        pushed_at: repo.pushed_at
+      }));
+    } catch (error) {
+      console.error('Error fetching repositories:', error);
+      return [];
+    }
+  };
+
+  const fetchCommits = async (repo_owner: string, repo: string, since: string): Promise<GitHubCommit[]> => {
+    try {
+      let response;
+      if (import.meta.server) {
+        // Server-side: use GitHub API directly
+        const token = process.env.GITHUB_TOKEN;
+        const url = `https://api.github.com/repos/${repo_owner}/${repo}/commits?since=${since}`;
+        response = await fetch(url, {
+          headers: {
+            Authorization: `token ${token}`,
+            Accept: "application/vnd.github.v3+json",
+          },
+        });
+      } else {
+        // Client-side: use Nuxt API route
+        const url = `/api/github/commits?repo_owner=${encodeURIComponent(repo_owner)}&repo=${encodeURIComponent(repo)}&since=${encodeURIComponent(since)}`;
+        response = await fetch(url);
+      }
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch commits for repo ${repo}`);
+      }
+      const data = await response.json();
+      console.log('Found ', data.length, ' commits for repo ', repo, 'since ', since);
+      return data.map((commit: any) => ({
+        commit_id: commit.sha,
+        author_name: commit.commit.author.name,
+        author_email: commit.commit.author.email,
+        author_username: commit.author?.login,
+        author_date: commit.commit.author.date,
+        message: commit.commit.message,
+        html_url: commit.html_url
+      }));
+    } catch (error) {
+      console.error('Error fetching commits:', error);
+      return [];
+    }
+  };
+
+  const updateGithubData = async () => {
+    const now = new Date();
+    let since: Date = new Date(now);
+    since = new Date(now);
+    since.setDate(now.getDate() - 1);
+
+    console.log("Fetching repos that have pushed since:", since.toISOString());
+    const repos = await fetchUserRepos(since.toISOString());
+
+    for (const repo of repos) {
+      const { data, error } = await supabase
+        .from("github_repos")
+        .upsert([
+          {
+            id: repo.id,
+            name: repo.name,
+            full_name: repo.full_name,
+            html_url: repo.html_url,
+            updated_at: repo.updated_at,
+            pushed_at: repo.pushed_at,
+          },
+        ])
+        .select();
+
+      if (error) {
+        console.error("Error when fetching repo:", error);
+        return null;
+      }
+
+      const repo_id = (data as any)[0].id;
+      commits.value = await fetchCommits(
+        repo.owner,
+        repo.name,
+        since.toISOString()
+      );
+
+      for (const commit of commits.value) {
+        const { data, error } = await supabase
+          .from("github_commits")
+          .upsert([
+            {
+              commit_id: commit.commit_id,
+              author_name: commit.author_name,
+              author_username: commit.author_username,
+              author_email: commit.author_email,
+              author_date: commit.author_date,
+              message: commit.message,
+              html_url: commit.html_url,
+              repo_id: repo_id,
+            },
+          ])
+          .select();
+
+        if (error) {
+          console.error("Error when fetching repo:", error);
+          return null;
+        }
+      }
+    }
+  };
+
+  const checkAndUpdateGithubData = async () => {
+    const now = new Date();
+    const { data: latest_commit } = await supabase
+      .from("github_commits")
+      .select("author_date")
+      .order("author_date", { ascending: false })
+      .limit(1);
+
+    if (latest_commit && latest_commit.length > 0) {
+      const latest_db_date = new Date(latest_commit[0].author_date);
+      console.log("Latest commit date:", latest_db_date);
+      const daysSinceLastUpdate = Math.ceil(
+        (now.getTime() - latest_db_date.getTime()) / (1000 * 3600 * 24)
+      );
+
+      if (daysSinceLastUpdate >= 1) {
+        console.log(
+          "Days since last update:",
+          daysSinceLastUpdate,
+          ", updating data"
+        );
+        await updateGithubData();
+      } else {
+        console.log("Data is up to date, no update needed");
+      }
+    } else {
+      console.log("No commits in the database, updating data");
+      await updateGithubData();
+    }
+  };
+
+  return {
+    commits,
+    daysBetween,
+    checkAndUpdateGithubData,
+  };
+}

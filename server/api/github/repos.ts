@@ -12,6 +12,7 @@ export default defineEventHandler(async (event: H3Event) => {
   }
 
   const token = process.env.GITHUB_TOKEN;
+  console.log('Fetching repos from https://api.github.com/user/repos');
   const response = await fetch("https://api.github.com/user/repos", {
     headers: {
       Authorization: `token ${token}`,
@@ -28,6 +29,7 @@ export default defineEventHandler(async (event: H3Event) => {
 
   const repos = await response.json();
   const sinceDate = new Date(since);
+  console.log('Filtering repos pushed since:', sinceDate.toISOString());
   const filteredRepos = repos.filter(
     (repo: any) => new Date(repo.pushed_at) >= sinceDate
   );
