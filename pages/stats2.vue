@@ -46,6 +46,16 @@
       </div>
     </div>
   </section>
+
+  <!-- TLDR -->
+  <div class="w-full flex justify-center mb-4">
+    <button v-if="!isTldrLoading" title="Give me a summary of this timeframe, based on the commits"
+      @click="giveTldr">tl;dr</button>
+    <div v-else class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+  </div>
+
+  <DismissableMarkdownModal v-if="showModal" :isVisible="showModal" :content="modalText" @close="showModal = false" />
+
   <SiteFooter />
 </template>
 
@@ -53,8 +63,16 @@
 import { onMounted, watch } from 'vue'
 import { GithubIcon } from 'lucide-vue-next'
 import { useChartUtils } from '@/composables/useChartUtils'
+import { useGithubStore } from '@/stores/githubStore';
+import DismissableMarkdownModal from '@/components/DismissableMarkdownModal.vue';
+import { getRandomLLMModel } from '@/utils/llm';
 
-const { selectedPeriod, projects, loading, timePeriods, ensureDataFreshness, getStartDate, updateSelectedPeriod } = useChartUtils()
+
+const showModal = ref(false);
+const modalText = ref('');
+const isTldrLoading = ref(false);
+
+const { selectedPeriod, projects, loading, timePeriods, daysSincePeriod, ensureDataFreshness, updateSelectedPeriod } = useChartUtils()
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -63,6 +81,67 @@ const formatDate = (dateString) => {
     day: 'numeric',
   })
 }
+
+const giveTldr = async () => {
+  isTldrLoading.value = true;
+  const githubStore = useGithubStore();
+
+  const commitsInPeriod = githubStore.getCommitsByPeriod(selectedPeriod.value);
+  console.log('Commits in period:', commitsInPeriod);
+
+  // Format commits for the LLM
+  const formattedCommits = commitsInPeriod.map(repo =>
+    `Repository: ${repo.repo_name}\nCommits:\n${repo.messages.map(commit => `- ${commit}`).join('\n')}`
+  ).join('\n\n');
+
+  console.log('Formatted commits:', formattedCommits);
+
+  try {
+    const days = daysSincePeriod(selectedPeriod.value);
+    const randomModel = getRandomLLMModel();
+    const message = `<commits>${formattedCommits}</commits> This is a list of commit messages from 
+      multiple Github repositories.  David has worked on these commits for the past ${days} day(s). 
+      For each repo, give 3 top level bullets, summarizing the major changes. Use markdown headers and 
+      markdowjn formatting in your response to make it readable. Start your response with the sentence 
+      'Here is a summary of David's changes over the past ${days} days.`;
+
+    const response = await fetch('/api/openrouter', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: randomModel,
+        messages: [{ role: 'user', content: message }],
+        max_tokens: 2000
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.success && data.data.choices && data.data.choices.length > 0) {
+      const generatedContent = data.data.choices[0].message.content;
+      console.log('Generated summary:', generatedContent);
+      const summaryCourtesyText = `*Summary courtesy of <a href="https://openrouter.ai/models/${randomModel}">${randomModel}</a> on <a href="https://openrouter.ai/">OpenRouter</a>*<br /><br /> `;
+
+      modalText.value = summaryCourtesyText + generatedContent;
+      showModal.value = true;
+    } else {
+      throw new Error('Unexpected response structure from OpenRouter');
+    }
+  } catch (error) {
+    console.error('Error generating summary:', error);
+    modalText.value = 'Error generating summary. Please try again later.';
+  } finally {
+    isTldrLoading.value = false;
+  }
+
+  return commitsInPeriod;
+};
 
 onMounted(async () => {
   await ensureDataFreshness()

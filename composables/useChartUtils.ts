@@ -27,6 +27,20 @@ export const timePeriods = [
   { label: "YTD", value: "ytd" },
 ];
 
+export const daysSincePeriod = (period: string): number => {
+  const now = new Date();
+  let sinceDate: Date;
+
+  if (period === "ytd") {
+    sinceDate = new Date(now.getFullYear(), 0, 1); // January 1st of current year
+  } else {
+    const days = parseInt(period);
+    sinceDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+  }
+
+  return Math.floor((now.getTime() - sinceDate.getTime()) / (24 * 60 * 60 * 1000));
+}
+
 export const useChartUtils = () => {
   const githubStore = useGithubStore();
   const selectedPeriod = ref("30");
@@ -63,6 +77,7 @@ export const useChartUtils = () => {
     projects,
     loading,
     timePeriods,
+    daysSincePeriod,
     ensureDataFreshness,
     getStartDate,
     getReposAndCommits,

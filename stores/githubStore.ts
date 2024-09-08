@@ -59,7 +59,6 @@ export const useGithubStore = defineStore("github", {
       console.log("Fetching fresh data...");
       await this.fetchProjects();
       console.log(this.projects);
-
     },
 
     async fetchProjects() {
@@ -142,6 +141,39 @@ export const useGithubStore = defineStore("github", {
       return state.projects.filter(
         (project) => new Date(project.pushed_at) >= sinceDate
       );
+    },
+    getCommitsByPeriod: (state) => (period: string) => {
+      const now = new Date();
+      let sinceDate: Date;
+    
+      if (period === "ytd") {
+        sinceDate = new Date(now.getFullYear(), 0, 1); // January 1st of current year
+      } else {
+        const days = parseInt(period);
+        sinceDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+      }
+    
+      // Define the type for our grouped commits
+      type GroupedCommit = {
+        repo_name: string;
+        messages: string[];
+      };
+    
+      // Filter projects and commits, then group by repository
+      return state.projects.reduce<GroupedCommit[]>((acc, project) => {
+        const recentCommits = project.allCommits.filter(commit => 
+          new Date(commit.author_date) >= sinceDate
+        );
+    
+        if (recentCommits.length > 0) {
+          acc.push({
+            repo_name: project.name,
+            messages: recentCommits.map(commit => commit.message)
+          });
+        }
+    
+        return acc;
+      }, []);
     },
   },
 });
