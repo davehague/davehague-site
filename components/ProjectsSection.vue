@@ -1,17 +1,36 @@
 <template>
   <section id="projects" class="py-20 bg-gray-100">
     <div class="container mx-auto px-6">
-      <h2 class="text-3xl font-bold mb-8 text-gray-900">Projects</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div v-for="project in projects" :key="project.id"
-          class="bg-white rounded-lg overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105">
-          <img :src="project.image" :alt="project.name" class="w-full h-48 object-cover" />
-          <div class="p-6">
-            <h3 class="text-xl font-semibold mb-2 text-gray-900">{{ project.name }}</h3>
-            <p class="text-gray-600 mb-4">{{ project.description }}</p>
-            <a :href="project.link" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">
-              Learn More
-            </a>
+      <h2 class="text-4xl font-bold mb-12 text-gray-900 text-center">Projects</h2>
+
+      <div class="space-y-16">
+        <div v-for="(projectGroup, index) in projectGroups" :key="index" class="bg-white rounded-lg shadow-lg p-8">
+          <h3 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">{{ projectGroup.title }}</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div v-for="project in projectGroup.projects" :key="project.id"
+              class="bg-gray-50 rounded-lg overflow-hidden shadow-md transition-transform duration-300 hover:scale-105">
+              <component :is="project.icon" class="w-full h-32 object-cover text-gray-400 p-4" />
+              <div class="p-6">
+                <h4 class="text-xl font-semibold mb-2 text-gray-900">{{ project.name }}</h4>
+                <p class="text-gray-600 mb-4">{{ project.description }}</p>
+              </div>
+              <div class="px-6 pb-4">
+                <div class="text-xs text-gray-500 mb-1 italic">
+                  <span v-if="project.techLanguages">{{ project.techLanguages }}</span>
+                  <span v-if="project.techFrameworks">, {{ project.techFrameworks }}</span>
+                  <span v-if="project.techServices">, {{ project.techServices }}</span>
+                </div>
+              </div>
+              <div class="py-4 px-6">
+                <p v-if="project.link && !project.link.includes('http')" class="text-sm text-gray-400 italic">
+                  {{ project.link }}
+                </p>
+                <a v-else-if="project.link" :href="project.link" target="_blank" rel="noopener noreferrer"
+                  class="text-blue-600 hover:text-blue-800 hover:underline transition-colors duration-300">
+                  Learn More
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -21,42 +40,124 @@
 
 <script setup>
 import { ref } from 'vue'
+import {
+  Coins, TrainFrontTunnel, Binoculars, Blocks, Clock8,
+  ScanEye, Soup, PencilRuler, NotebookPen, PhoneIncoming, SquareCheckBig, Keyboard
+} from 'lucide-vue-next'
 
-const projects = ref([
-{
-    id: 5,
-    name: 'Commission Controls',
-    description: 'Track and reconcile insurance commissions with your book of business.',
-    image: 'images/commission-control.png?height=300&width=400',
-    link: 'https://github.com/davehague/',
-  },
+const shippedProjects = [
   {
-    id: 4,
-    name: 'Prompt Central Station',
-    description: 'Decouple prompt management from application code and enable non-technical users to modify prompts and parameters without code changes.',
-    image: 'images/steam_locomotive.png?height=300&width=400',
-    link: 'https://github.com/davehague/prompt-central-station/',
-  },
-  {
-    id: 3,
+    id: 1,
     name: 'JobScout',
     description: 'Get job postings that match your skills, experience, and preferences and take the guesswork out of your job search.',
-    image: 'images/jobscout.png?height=300&width=400',
+    icon: Binoculars,
+    techLanguages: 'Typescript, Python',
+    techFrameworks: 'VueJS, NuxtJS',
+    techServices: 'Supabase, LLMs, GCP Cloud Functions, Mailjet, Vercel',
     link: 'https://jobs.timetovalue.org/',
   },
   {
     id: 2,
     name: 'PromptBlocks',
     description: 'A prompt library that allows for composability, shareability, tagging and categorization, and parameterization of prompts.',
-    image: 'images/promptblocks.png?height=300&width=400',
+    techLanguages: 'Typescript',
+    techFrameworks: 'VueJS, NuxtJS',
+    techServices: 'Supabase, LLMs, Mailjet, Vercel',
+    icon: Blocks,
     link: 'https://promptblocks.app/',
   },
+]
+
+const emergingProjects = [
   {
     id: 1,
+    name: 'Commission Controls',
+    description: 'Track and reconcile insurance commissions with your book of business.',
+    icon: Coins,
+    techLanguages: 'Typescript, Python',
+    techFrameworks: 'VueJS, NuxtJS, FastAPI',
+    techServices: 'Postgres',
+    link: 'Coming soon',
+  },
+  {
+    id: 2,
+    name: 'Prompt Central Station',
+    description: 'Decouple prompt management from application code. Enable non-technical users to modify prompts and parameters without code changes.',
+    icon: TrainFrontTunnel,
+    techLanguages: 'Python',
+    link: 'https://github.com/davehague/prompt-central-station/',
+  },
+]
+
+const experiments = [
+  {
+    id: 1,
+    name: 'Pickleball Watcher',
+    description: 'Never get locked out, get daily emails when new sessions are posted.',
+    icon: ScanEye,
+    techLanguages: 'Python',
+    techServices: 'Mailjet',
+    link: 'Coming soon',
+  },
+  {
+    id: 2,
+    name: 'The Yoosz',
+    description: 'The usual order from the usual places, shared with the usual people.',
+    icon: Soup,
+    techLanguages: 'Typescript',
+    techFrameworks: 'VueJS, NuxtJS',
+    techServices: 'Supabase',
+    link: 'Coming soon',
+  },
+  // {
+  //   id: 3,
+  //   name: 'Home Maintenance Tracker',
+  //   description: 'Stay on top of your home maintenance tasks and projects.',
+  //   icon: PencilRuler,
+  //   techLanguages: 'TBD',
+  //   link: 'Coming soon',
+  // },
+  {
+    id: 4,
+    name: 'Motes',
+    description: 'Write your entire life autobiography, one tweet at a time',
+    icon: NotebookPen,
+    techLanguages: 'Typescript',
+    techFrameworks: 'VueJS, NuxtJS',
+    techServices: 'Supabase',
+    link: 'Coming soon',
+  },
+  {
+    id: 5,
+    name: 'Caller Coach',
+    description: 'Get a call from AI to keep you on track with your goals.',
+    icon: PhoneIncoming,
+    techLanguages: 'Python',
+    link: 'https://github.com/davehague/caller_coach',
+  },
+  {
+    id: 6,
     name: 'Task Prioritizer',
-    description: 'A task prioritization matrix that allows you to compare tasks that you are considering, comparing them to each other to find your next top task.',
-    image: 'images/question.png?height=300&width=400',
+    description: 'Compare tasks that you are considering to find your next top task.',
+    icon: SquareCheckBig,
+    techLanguages: 'Typescript',
+    techFrameworks: 'ReactJS, NextJS',
     link: 'https://tasks.davehague.com/',
   },
+  {
+    id: 7,
+    name: 'LLM Desktop',
+    description: 'Hotkey to your favorite LLM models.',
+    icon: Keyboard,
+    techLanguages: 'Typescript',
+    techFrameworks: 'Electron',
+    link: 'https://github.com/davehague/llm-wrapper-electron',
+  },
+]
+
+const projectGroups = ref([
+  { title: 'Shipped', projects: shippedProjects },
+  { title: 'Emerging', projects: emergingProjects },
+  { title: 'Experiments', projects: experiments },
 ])
 </script>

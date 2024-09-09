@@ -23,7 +23,7 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div>
               <p class="text-lg mb-4 text-gray-700">
-                I'm a seasoned developer with a passion for building software, currently focused on Python and TypeScript.  
+                I'm a seasoned developer with a passion for building and shipping software, currently focused on Python and TypeScript.  
                 As a former .NET developer and engineering leader I bring a diverse skill set to every project.  
                 I haven't yet seen a hat I'm unwilling or unable to put on.
               </p>
