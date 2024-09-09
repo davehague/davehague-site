@@ -12,7 +12,21 @@
         </button>
       </div>
 
-      <StackedBarChart :timeframe="selectedPeriod" class="mb-12" />
+      <StackedBarChart :timeframe="selectedPeriod" class="mb-8" />
+
+      <div class="text-center text-gray-700 mb-12">
+        <p v-if="averageCommitsPerDay(true) > 0">
+          Averaging <strong>{{ averageCommitsPerDay(false).toFixed(2) }}</strong> commits per day in this period.
+        </p>
+
+        <p v-if="averageCommitsPerDay(true) > 0">
+          Averaging <strong>{{ averageCommitsPerDay(true).toFixed(2) }}</strong> commits per weekday in this period.
+        </p>
+
+        <p v-else>
+          No commits found in the selected period.
+        </p>
+      </div>
 
       <div v-if="loading" class="text-center">
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
@@ -82,6 +96,57 @@ const formatDate = (dateString) => {
     month: 'short',
     day: 'numeric',
   })
+}
+
+const averageCommitsPerDay = (weekdaysOnly) => {
+  const githubStore = useGithubStore();
+  const commitsInPeriod = githubStore.getCommitsByPeriod(selectedPeriod.value);
+  const commitMessagesCount = commitsInPeriod.reduce((count, commit) => count + commit.messages.length, 0);
+
+
+  console.log('Commits in period:', commitsInPeriod);
+  console.log('Commit messages count:', commitMessagesCount);
+  
+  const days = daysSincePeriod(selectedPeriod.value);
+  
+  const weekDaysInPeriod = getWeekdaysInPeriod(selectedPeriod.value);
+  return weekdaysOnly ? commitMessagesCount / weekDaysInPeriod : commitMessagesCount / days;
+};
+
+
+function getWeekdaysInPeriod(period) {
+  const start = getStartDateForPeriod(period);
+  const end = new Date(); // Assuming we're calculating up to today
+  let weekdays = 0;
+  
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    if (d.getDay() !== 0 && d.getDay() !== 6) weekdays++;
+  }
+  
+  return weekdays;
+}
+
+function getStartDateForPeriod(period) {
+  const today = new Date();
+  let startDate = new Date(today);
+
+  switch (period) {
+    case "7":
+    case "30":
+    case "60":
+    case "90":
+      // Subtract the number of days from today
+      startDate.setDate(today.getDate() - parseInt(period));
+      break;
+    case "ytd":
+      // Set to January 1st of the current year
+      startDate = new Date(today.getFullYear(), 0, 1);
+      break;
+    default:
+      throw new Error("Invalid period selected");
+  }
+
+  return startDate;
 }
 
 const giveTldr = async () => {
