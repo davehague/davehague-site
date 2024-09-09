@@ -7,7 +7,12 @@
           <div class="p-6">
             <h3 class="text-xl font-semibold mb-2 text-gray-900">{{ post.title }}</h3>
             <p class="text-gray-600 mb-4">{{ post.excerpt }}</p>
-            <a :href="post.link" class="text-blue-600 hover:underline">Read More</a>
+            <NuxtLink 
+              :to="`/blog/${post.slug}`"
+              class="text-blue-600 hover:underline"
+            >
+              Read More
+            </NuxtLink>
           </div>
         </div>
       </div>
@@ -15,27 +20,29 @@
   </section>
 </template>
 
-<script setup>
-import { ref } from 'vue'
 
-const blogPosts = ref([
-  {
-    id: 1,
-    title: 'The Future of AI in Software Development',
-    excerpt: 'Exploring how AI is reshaping the landscape of software development and what it means for developers.',
-    link: '#',
-  },
-  {
-    id: 2,
-    title: 'Building Scalable APIs with FastAPI',
-    excerpt: 'A deep dive into creating efficient and scalable APIs using FastAPI and best practices.',
-    link: '#',
-  },
-  {
-    id: 3,
-    title: 'My Journey from .NET to Python and TypeScript',
-    excerpt: 'Reflecting on the transition from .NET to Python and TypeScript, and the lessons learned along the way.',
-    link: '#',
-  },
-])
+<script setup>
+import { ref, onMounted } from 'vue'
+import { supabase } from '@/utils/supabaseClient'
+
+const blogPosts = ref([])
+
+const fetchBlogPosts = async () => {
+  const { data, error } = await supabase
+    .from('blogs')
+    .select('id, title, slug, excerpt')
+    .order('created_at', { ascending: false })
+    .limit(6)
+
+  if (error) {
+    console.error('Error fetching blog posts:', error)
+  } else {
+    blogPosts.value = data
+    console.log(data)
+  }
+}
+
+onMounted(() => {
+  fetchBlogPosts()
+})
 </script>
