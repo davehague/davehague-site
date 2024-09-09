@@ -1,0 +1,331 @@
+{
+  "categories": [
+    {
+      "name": "Company",
+      "type": "multi"
+    },
+    {
+      "name": "Modules",
+      "type": "multi"
+    },
+    {
+      "name": "Permissions",
+      "type": "multi"
+    },
+    {
+      "name": "Mode",
+      "type": "multi"
+    },
+    {
+      "name": "Role",
+      "type": "single"
+    },
+    {
+      "name": "Spec Review",
+      "type": "multi"
+    },
+    {
+      "name": "Code Review",
+      "type": "multi"
+    },
+    {
+      "name": "Customer Feedback",
+      "type": "multi"
+    },
+    {
+      "name": "Test Case Generation",
+      "type": "multi"
+    },
+    {
+      "name": "API Test Generation",
+      "type": "multi"
+    },
+    {
+      "name": "Prompt tuning",
+      "type": "multi"
+    },
+    {
+      "name": "General Development",
+      "type": "single"
+    },
+    {
+      "name": "General QA",
+      "type": "single"
+    }
+  ],
+  "promptFragments": [
+    {
+      "category": "Company",
+      "name": "What is FMX (the company)",
+      "promptText": "FMX (the company) is a remote-first SaaS company building great software by enabling great people to do their best work through great technology and a great culture.  At FMX, we're dedicated to providing a fulfilling and challenging work environment that values our employees' well-being and growth, both personally and professionally.  As a company, we’re committed to growing sustainably, which provides job security for employees even during economic downturns."
+    },
+    {
+      "category": "Company",
+      "name": "What is FMX (the product)",
+      "promptText": "FMX (the product) is a computerized maintenance management system that streamlines maintenance processes for facilities leaders. Our mission is to simplify complex tasks and improve our customers' lives. Through ease of use, configurability, and world class customer support, we strive to meet the unique needs of each organization we serve."
+    },
+    {
+      "category": "Company",
+      "name": "FMX Core Values",
+      "promptText": "At FMX, our core values are (1) Integrity: Doing the right thing, especially when it’s hard (2) Excellence: Embrace productive discomfort, commitment to continuous improvement, and coachability (3) Teamwork:  respectful communication, ask for help and give help, own your own attitude and impact"
+    },
+    {
+      "category": "Modules",
+      "name": "Work requests",
+      "promptText": "Work requests (intention: track and follow, assign workers, respond, approve, start and stop work, and resolve maintenance requests in a facility)"
+    },
+    {
+      "category": "Modules",
+      "name": "Schedule requests",
+      "promptText": "Schedule requests (intention: create and track upcoming scheduled events in a facility, detect conflicts, assign workers, respond to, cancel, invoice the requesting user).  A schedule request can be repeating, resulting in multiple occurrences per schedule request."
+    },
+    {
+      "category": "Modules",
+      "name": "Work tasks",
+      "promptText": "Planned Maintenance (also called Work Tasks) (intention: create and follow recurring maintenance requests, assign, respond, execute a set of instructions).  A planned maintenance task can be repeating, resulting in multiple occurrences per work task.  Work tasks can be repeating based on a timeframe (every day, week, year, etc) or based on a meter (when a meter hits a certain threshold)"
+    },
+    {
+      "category": "Permissions",
+      "name": "Permissions",
+      "promptText": "The product also allows various user types to have differing levels of access (create requests, read my own requests, read any request, edit my own requests, edit any requests, and many more permutations of permissions) to the modules and requests within a module.  A user may have one and only one usertype.  Typical usertypes include Administrator (typically has full access to everything within the product), Maintenance director (has full rights within a particular module), Maintenance technician (has full rights to their own requests and view/resolve/respond/etc for requests assigend to them)"
+    },
+    {
+      "category": "Mode",
+      "name": "Specs for feature enhancement",
+      "promptText": "Below is information about an upcoming feature enhancement for the product."
+    },
+    {
+      "category": "Role",
+      "name": "C# software developer",
+      "promptText": "I want you to act as a C# software developer."
+    },
+    {
+      "category": "Role",
+      "name": "QA Tester",
+      "promptText": "I want you to act as a software quality tester."
+    },
+    {
+      "category": "Spec Review",
+      "name": "Understanding User Requirements",
+      "promptText": "Review the user requirements document to ensure all functional and non-functional requirements are clearly defined and feasible."
+    },
+    {
+      "category": "Spec Review",
+      "name": "Evaluating Technical Specifications",
+      "promptText": "Examine the technical specifications for the upcoming feature, focusing on system architecture, data flow, and integration points."
+    },
+    {
+      "category": "Spec Review",
+      "name": "Compatibility and Constraints Analysis",
+      "promptText": "Analyze the feature for compatibility with existing modules and identify any potential constraints or limitations."
+    },
+    {
+      "category": "Spec Review",
+      "name": "Feedback on Feature Design",
+      "promptText": "Provide feedback on the feature design, considering user experience, scalability, and maintainability."
+    },
+    {
+      "category": "Code Review",
+      "name": "Code Quality and Standards",
+      "promptText": "Review the submitted code for adherence to coding standards and best practices, including readability and documentation."
+    },
+    {
+      "category": "Code Review",
+      "name": "Security and Vulnerability Assessment",
+      "promptText": "Assess the code for potential security vulnerabilities and suggest necessary patches or improvements."
+    },
+    {
+      "category": "Code Review",
+      "name": "Performance Optimization",
+      "promptText": "Evaluate the code for performance efficiency, identifying areas for optimization in terms of speed and resource usage."
+    },
+    {
+      "category": "Code Review",
+      "name": "Peer Review Feedback",
+      "promptText": "Provide constructive feedback to peers on their code, focusing on areas for improvement and learning."
+    },
+    {
+      "category": "Customer Feedback",
+      "name": "Analyzing Customer Feedback Data",
+      "promptText": "Review and analyze customer feedback data to identify common trends, issues, and areas for product improvement."
+    },
+    {
+      "category": "Customer Feedback",
+      "name": "Prioritizing Feature Requests",
+      "promptText": "Prioritize customer feature requests based on feasibility, impact, and alignment with product roadmap."
+    },
+    {
+      "category": "Customer Feedback",
+      "name": "Customer Satisfaction Metrics",
+      "promptText": "Evaluate customer satisfaction metrics and suggest strategies to improve user experience and engagement."
+    },
+    {
+      "category": "Customer Feedback",
+      "name": "Feedback Implementation Plan",
+      "promptText": "Develop a plan for implementing changes based on customer feedback, considering resource allocation and timelines."
+    },
+    {
+      "category": "Test Case Generation",
+      "name": "Developing Test Scenarios",
+      "promptText": "Create detailed test scenarios that cover all aspects of the new feature, including edge cases and failure modes."
+    },
+    {
+      "category": "Test Case Generation",
+      "name": "Automated Test Scripts",
+      "promptText": "Write automated test scripts to efficiently validate the functionality and reliability of the new feature."
+    },
+    {
+      "category": "Test Case Generation",
+      "name": "Test Data Preparation",
+      "promptText": "Prepare relevant test data and environments to simulate real-world usage conditions for thorough testing."
+    },
+    {
+      "category": "Test Case Generation",
+      "name": "Cross-Platform Testing Plan",
+      "promptText": "Develop a cross-platform testing plan to ensure the feature works seamlessly across different devices and operating systems."
+    },
+    {
+      "category": "API Test Generation",
+      "name": "API Functionality Tests",
+      "promptText": "Create tests to validate the functionality of the new API endpoint, ensuring it meets the specified requirements."
+    },
+    {
+      "category": "API Test Generation",
+      "name": "API Security Testing",
+      "promptText": "Develop security tests for the API endpoint to check for vulnerabilities like SQL injection and data leaks."
+    },
+    {
+      "category": "API Test Generation",
+      "name": "Load Testing for API",
+      "promptText": "Plan and execute load tests to determine the scalability and performance limits of the API under heavy usage."
+    },
+    {
+      "category": "API Test Generation",
+      "name": "API Documentation Review",
+      "promptText": "Review the API documentation for accuracy and completeness, ensuring it's user-friendly for developers."
+    },
+    {
+      "category": "Prompt tuning",
+      "name": "Ask clarifying questions before beginning",
+      "promptText": "Before starting any work, ask any clarifying questions you have. Once we’ve answered those questions present a plan of action before starting in on a solution. Think through the problem step by step."
+    },
+    {
+      "category": "Prompt tuning",
+      "name": "Think step by step",
+      "promptText": "Think through your answer step by step."
+    },
+    {
+      "category": "Prompt tuning",
+      "name": "Scale of 1 to 10 previous response",
+      "promptText": "On a scale of 1 to 10 where 1 is {{low value}} and 10 is {{high value}} how would you rate your last response?"
+    },
+    {
+      "category": "Prompt tuning",
+      "name": "Respond that you understand",
+      "promptText": "Respond that you understand the instructions and are ready, then I will paste my next message."
+    },
+    {
+      "category": "Prompt tuning",
+      "name": "A little extra effort",
+      "promptText": "Is that the best you can do? Make sure you're doing your absolute best work to give a comprehensive answer. Please make one more pass, see if you can make any more progress. I know you can do it! Please try very hard, work step by step, and concentrate. I'll tip you $40 if you do a good job!"
+    },
+    {
+      "category": "General Development",
+      "name": "Investigate Bug Report",
+      "promptText": "Investigate the latest bug report on the issue tracker, determine its cause, and outline a plan to resolve it."
+    },
+    {
+      "category": "General Development",
+      "name": "Review Deployment Process",
+      "promptText": "Review the current deployment process and identify any areas for improvement in efficiency and reliability."
+    },
+    {
+      "category": "General Development",
+      "name": "Update Documentation",
+      "promptText": "Update the software documentation to reflect recent changes in the application's functionality and API endpoints."
+    },
+    {
+      "category": "General Development",
+      "name": "Assess New Technology",
+      "promptText": "Assess the feasibility of integrating a new technology or framework that could improve the application's performance or user experience."
+    },
+    {
+      "category": "General QA",
+      "name": "Create Test Plan for New Feature",
+      "promptText": "Develop a comprehensive test plan for a new feature, outlining all the test cases and scenarios to ensure the feature's functionality and stability."
+    },
+    {
+      "category": "General QA",
+      "name": "Automate Regression Tests",
+      "promptText": "Identify key areas for automation in the regression test suite to improve testing efficiency and coverage for each release cycle."
+    },
+    {
+      "category": "General QA",
+      "name": "Evaluate User Feedback",
+      "promptText": "Analyze user feedback for reported issues, categorize them based on severity, and prioritize them for the development team."
+    },
+    {
+      "category": "General QA",
+      "name": "Conduct Performance Testing",
+      "promptText": "Design and execute performance tests to assess the application's response times, scalability, and resource usage under various conditions."
+    },
+    {
+      "category": "General QA",
+      "name": "Review and Update QA Processes",
+      "promptText": "Review current QA processes and procedures for effectiveness and efficiency. Propose updates or improvements where necessary."
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "Developer - Do a code review",
+      "categories": [
+        "Company",
+        "Modules",
+        "Permissions",
+        "Code Review",
+        "Prompt Tuning"
+      ]
+    },
+    {
+      "name": "Developer - General Development",
+      "categories": ["General Development"]
+    },
+    {
+      "name": "Developer - Review Specs for a new feature",
+      "categories": [
+        "Company",
+        "Modules",
+        "Permissions",
+        "Spec Review",
+        "Prompt Tuning"
+      ]
+    },
+    {
+      "name": "Product - Review customer feedback",
+      "categories": ["Company", "Modules", "Permissions", "Customer feedback"]
+    },
+    {
+      "name": "QA - Generate an API test for a new endpoint",
+      "categories": [
+        "Company",
+        "Modules",
+        "Permissions",
+        "API test generation",
+        "Prompt Tuning"
+      ]
+    },
+    {
+      "name": "QA - Generate test cases for a new feature",
+      "categories": [
+        "Company",
+        "Modules",
+        "Permissions",
+        "Test case generation"
+      ]
+    },
+    {
+      "name": "QA - General QA",
+      "categories": ["General QA"]
+    }
+  ]
+}

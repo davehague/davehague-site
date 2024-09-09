@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="PromptGenerator.css" />
+  </head>
+  <body>
+    <select id="scenarioSelect" onchange="updateScenario(event)">
+      <option value="default">Select a Scenario</option>
+    </select>
+
+    <div id="checkboxesArea"></div>
+    <textarea id="prompt"></textarea>
+    <div id="copyArea">
+      <button onclick="copyPrompt()">Copy Prompt</button>
+      <span id="copyMessage"></span>
+    </div>
+
+    <!-- Upload button -->
+    <button id="uploadButton" title="Upload JSON">&#8593;</button>
+    <input type="file" id="fileInput" style="display: none" />
+
+    <script src="PromptGenerator.js"></script>
+  </body>
+</html>

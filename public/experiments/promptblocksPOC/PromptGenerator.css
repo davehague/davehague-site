@@ -1,0 +1,113 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+  padding: 20px;
+}
+
+h2 {
+  color: #007bff;
+}
+
+#checkboxesArea {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.category {
+  flex: 1 0 calc(25% - 40px); /* adjust the percentage depending on the number of categories */
+  background-color: #fff;
+  border-radius: 5px;
+  padding: 20px;
+  margin: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+#prompt {
+  width: 90%;
+  height: 200px;
+  border: none;
+  padding: 20px;
+  font-size: 1.2em;
+  margin: 20px auto;
+  display: block;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  resize: none;
+}
+
+button {
+  display: block;
+  width: 200px;
+  height: 40px;
+  margin: 20px auto;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  flex-shrink: 0; /* Prevent button from shrinking */
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+button:active {
+  background-color: #003680;
+}
+
+#uploadButton {
+  position: fixed; /* Fixed position */
+  top: 10px; /* Distance from the top */
+  right: 10px; /* Distance from the right */
+  background-color: transparent; /* Transparent background */
+  border: none; /* No border */
+  font-size: 24px; /* Icon size, adjust as needed */
+  cursor: pointer;
+  color: #707070; /* Light gray color */
+}
+
+#uploadButton:hover {
+  color: #000000; /* Slightly darker gray on hover for better interaction */
+}
+
+#copyArea {
+  display: flex;
+  justify-content: flex-start; /* Align the button and message to the start */
+  align-items: center;
+  width: 200px; /* The same width as your button */
+  margin: 20px auto; /* Center the container */
+}
+
+#copyMessage {
+  margin-left: 10px;
+}
+
+select {
+  width: 100%; /* Make the select box wider */
+  max-width: 600px; /* Maximum width can be adjusted as needed */
+  height: 35px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 5px;
+  font-size: 1em;
+  margin: 20px auto; /* Margin auto for centering */
+  display: block; /* Ensures the select box is a block-level element for centering */
+  cursor: pointer;
+}
+
+/* Restyle the file input to match the new dropdown */
+input[type="file"] {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 5px;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
