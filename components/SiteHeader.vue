@@ -22,6 +22,6 @@ const navItems = [
   { id: 'about', name: 'About' },
   { id: 'projects', name: 'Projects' },
   { id: 'blog', name: 'Blog' },
-  { id: 'stats', name: 'Stats', link: '/stats2' }
+  { id: 'stats', name: 'Stats', link: '/stats' }
 ]
 </script>

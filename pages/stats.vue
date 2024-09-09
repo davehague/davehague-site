@@ -1,217 +1,153 @@
 <template>
-  <div class="content">
-    <site-header />
-    <main>
-      <section id="home">
-        <h1>Github Stats</h1>
-        <RadarChart @timeframe="handleTimeframe" />
-        <DismissableMarkdownModal v-if="showModal" :isVisible="showModal" :content="tldrText"
-          @close="showModal = false" />
-      </section>
-    </main>
-    <site-footer />
+  <SiteHeader />
+  <section id="github-activity" class="py-20 bg-white">
+    <div class="container mx-auto px-6">
+      <h2 class="text-3xl font-bold mb-8 text-gray-900 text-center">My GitHub Activity</h2>
+
+      <div class="mb-8 flex justify-center space-x-4">
+        <button v-for="period in timePeriods" :key="period.value" @click="updateSelectedPeriod(period.value)"
+          class="px-4 py-2 rounded-full transition-colors duration-300"
+          :class="selectedPeriod === period.value ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'">
+          {{ period.label }}
+        </button>
+      </div>
+
+      <StackedBarChart :timeframe="selectedPeriod" class="mb-12" />
+
+      <div v-if="loading" class="text-center">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
+        <p class="mt-2 text-gray-700">Getting the latest projects...</p>
+      </div>
+
+      <div v-else-if="projects.length === 0" class="text-center">
+        <GithubIcon class="mx-auto h-16 w-16 text-gray-400" />
+        <p class="mt-4 text-xl text-gray-700">No activity found for the selected period.</p>
+      </div>
+
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div v-for="project in projects" :key="project.id"
+          class="bg-gray-100 rounded-lg p-6 shadow-md transition-transform duration-300 hover:scale-105">
+          <h3 class="text-2xl font-semibold mb-4 text-gray-900">{{ project.name }}</h3>
+          <p class="text-gray-600 mb-4">Last updated: {{ formatDate(project.updated_at) }}</p>
+          <a :href="project.html_url" target="_blank" rel="noopener noreferrer"
+            class="text-blue-600 hover:text-blue-800 transition-colors duration-300 mb-4 block">
+            View on GitHub
+          </a>
+          <h4 class="text-lg font-semibold mb-2 text-gray-900">Recent Commits:</h4>
+          <ul v-if="project.allCommits && project.allCommits.length" class="space-y-2">
+            <li v-for="commit in project.allCommits.slice(0, 3)" :key="commit.commit_id"
+              class="bg-white rounded p-2 shadow-sm">
+              <p class="text-sm text-gray-800">{{ commit.message }}</p>
+              <p class="text-xs text-gray-600 mt-1">{{ formatDate(commit.author_date) }} by {{ commit.author_name }}</p>
+            </li>
+          </ul>
+          <p v-else class="text-sm text-gray-700">No recent commits found.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TLDR -->
+  <div class="w-full flex justify-center mb-4">
+    <button v-if="isSelectedPeriodShort && !isTldrLoading" title="Give me a summary of this timeframe, based on the commits"
+      @click="giveTldr">tl;dr</button>
+    <div v-else-if="!isSelectedPeriodShort"></div>
+      <div v-else class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
   </div>
+
+  <DismissableMarkdownModal v-if="showModal" :isVisible="showModal" :content="modalText" @close="showModal = false" />
+
+  <SiteFooter />
 </template>
 
-<script lang="ts">
-import { defineComponent, onMounted } from 'vue';
-import SiteHeader from '@/components/SiteHeader.vue';
-import SiteFooter from '@/components/SiteFooter.vue';
-import RadarChart from '@/components/RadarChart.vue';
+<script setup>
+import { onMounted, watch } from 'vue'
+import { GithubIcon } from 'lucide-vue-next'
+import { useChartUtils } from '@/composables/useChartUtils'
+import { useGithubStore } from '@/stores/githubStore';
 import DismissableMarkdownModal from '@/components/DismissableMarkdownModal.vue';
-import { supabase } from "@/utils/supabaseClient";
-import { type GitHubRepo, type GitHubCommit } from '@/types/interfaces';
+import { getRandomLLMModel } from '@/utils/llm';
 
-export default defineComponent({
-  components: {
-    SiteHeader,
-    SiteFooter,
-    RadarChart,
-    DismissableMarkdownModal
-  },
-  setup() {
-    const commits = ref<GitHubCommit[]>([]);
-    let daysBetween = ref(0);
-    let tldrText = ref('');
-    const showModal = ref(false);
 
-    const fetchUserRepos = async (since: string): Promise<GitHubRepo[]> => {
-      try {
-        const response = await fetch(`/api/github/repos?since=${encodeURIComponent(since)}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch repositories');
-        }
-        const data = await response.json();
-        return data.map((repo: any) => {
-          return {
-            id: repo.id,
-            name: repo.name,
-            full_name: repo.full_name,
-            owner: repo.full_name.split('/')[0],
-            html_url: repo.html_url,
-            updated_at: repo.updated_at,
-            pushed_at: repo.pushed_at
-          };
-        });
-      } catch (error) {
-        console.error('Error fetching repositories:', error);
-        return [];
-      }
-    };
+const showModal = ref(false);
+const modalText = ref('');
+const isTldrLoading = ref(false);
 
-    const fetchCommits = async (repo_owner: string, repo: string, since: string): Promise<GitHubCommit[]> => {
-      try {
-        const response = await fetch(`/api/github/commits?repo_owner=${repo_owner}&repo=${repo}&since=${since}`);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch commits for repo ${repo}`);
-        }
-        const data = await response.json();
-        console.log('Found ', data.length, ' commits for repo ', repo, 'since ', since);
-        return data.map((commit: any) => {
-          return {
-            commit_id: commit.sha,
-            author_name: commit.commit.author.name,
-            author_email: commit.commit.author.email,
-            author_username: commit.author.login,
-            author_date: commit.commit.author.date,
-            message: commit.commit.message,
-            html_url: commit.html_url
-          };
-        })
-      } catch (error) {
-        console.error('Error fetching commits:', error);
-        return [];
-      }
-    };
+const { selectedPeriod, projects, loading, timePeriods, daysSincePeriod, ensureDataFreshness, updateSelectedPeriod } = useChartUtils()
+const isSelectedPeriodShort = computed(() => daysSincePeriod(selectedPeriod.value) <= 60)
 
-    const tldr = async (timeframe: number, commitMessages: any) => {
-      try {
-        let message = "Following is a list of commit messages from a number of Github repositories."
-          + ` David has worked on these commits for the past ${timeframe} day(s). For each repo, `
-          + " give 3 top level bullets, summarizing the major changes. Order the summary by the repos"
-          + " with the most changes at the top. Start with the sentence "
-          + `'Here is a summary of David's changes over the past ${timeframe} days:'` 
-          + "\n\n"
-          + commitMessages;
+const formatDate = (dateString) => {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}
 
-        console.log(message);
+const giveTldr = async () => {
+  isTldrLoading.value = true;
+  const githubStore = useGithubStore();
 
-        const res = await fetch('/api/openai', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ message: message }),
-        });
+  const commitsInPeriod = githubStore.getCommitsByPeriod(selectedPeriod.value); 
+  console.log('Commits in period:', commitsInPeriod);
+  const formattedCommits =  JSON.stringify(commitsInPeriod);
+  try {
+    const days = daysSincePeriod(selectedPeriod.value);
+    const randomModel = getRandomLLMModel();
+    const message = `${formattedCommits}. This is a list of repos and their associated commit messages.
+      David has worked on these commits for the past ${days} day(s). 
+      For each repo, give a two sentence summary of what you deem to be the most important changes during the time period.
+      Use markdown headers and markdown formatting in your response to make it readable.  Put the repo with the most activity at the top.
+      Start your response with the sentence  'Here is a summary of David's changes over the past ${days} days.`;
 
-        const data = await res.json();
-        console.log(data.message.content);
-        tldrText.value = data.message.content;
-        showModal.value = true;
-      } catch (error) {
-        console.error('Error:', error);
-      }
-    };
+      console.log('Message:', message);
 
-    const handleTimeframe = async (timeframe: number) => {
-      console.log('Timeframe:', timeframe);
-      let authorDate = new Date();
-      authorDate.setDate(authorDate.getDate() - timeframe);
-      console.log('Author date:', authorDate);
 
-      const { data, error } = await supabase
-        .from('github_commits')
-        .select(`message, github_repos (name)`)
-        .gt('author_date', authorDate.toISOString());
-
-      if (error) {
-        console.error('Error fetching data:', error);
-        return null;
-      }
-
-      const result = data.map((commit: any) => {
-        return {
-          repo_name: commit.github_repos.name,
-          message: commit.message
-        };
-      }).reduce((acc: any, curr: any) => {
-        if (acc[curr.repo_name]) {
-          acc[curr.repo_name].push(curr.message);
-        } else {
-          acc[curr.repo_name] = [curr.message];
-        }
-        return acc;
-      }, {});
-
-      tldr(timeframe, JSON.stringify(result, null, 2));
-    };
-
-    onMounted(async () => {
-      const now = new Date();
-      let since: Date;
-      since = new Date(now);
-
-      const { data: latest_commit } = await supabase
-        .from('github_commits')
-        .select('author_date')
-        .order('author_date', { ascending: false })
-        .limit(1);
-
-      let latest_db_date = new Date(latest_commit?.[0].author_date || now.getDate() - 1);
-      console.log('Latest commit date:', latest_db_date);
-      daysBetween.value = Math.ceil((now.getTime() - latest_db_date.getTime()) / (1000 * 3600 * 24));
-      since.setDate(now.getDate() - daysBetween.value);
-
-      console.log('Fetching repos that have pushed since:', since.toISOString());
-      const repos = await fetchUserRepos(since.toISOString());
-
-      for (const repo of repos) {
-        const { data, error } = await supabase
-          .from('github_repos')
-          .upsert([{
-            id: repo.id, name: repo.name, full_name: repo.full_name, html_url: repo.html_url,
-            updated_at: repo.updated_at, pushed_at: repo.pushed_at
-          }])
-          .select();
-
-        if (error) {
-          console.error('Error when fetching repo:', error);
-          return null;
-        }
-
-        const repo_id = (data as any)[0].id;
-        commits.value = await fetchCommits(repo.owner, repo.name, since.toISOString());
-        console.log(commits);
-
-        for (const commit of commits.value) {
-          const { data, error } = await supabase
-            .from('github_commits')
-            .upsert([{
-              commit_id: commit.commit_id,
-              author_name: commit.author_name,
-              author_username: commit.author_username,
-              author_email: commit.author_email,
-              author_date: commit.author_date,
-              message: commit.message,
-              html_url: commit.html_url,
-              repo_id: repo_id
-            }])
-            .select();
-
-          if (error) {
-            console.error('Error when fetching repo:', error);
-            return null;
-          }
-        }
-      }
+    const response = await fetch('/api/openrouter', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: randomModel,
+        messages: [{ role: 'user', content: message }],
+        max_tokens: 3000
+      }),
     });
 
-    return {
-      tldr,
-      tldrText,
-      showModal,
-      handleTimeframe
-    };
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('OpenRouter response:', data);
+
+    if (data.success && data.data.choices && data.data.choices.length > 0) {
+      const generatedContent = data.data.choices[0].message.content.trim();
+      console.log(generatedContent);
+      const summaryCourtesyText = `*Summary courtesy of <a href="https://openrouter.ai/models/${randomModel}">${randomModel}</a> on <a href="https://openrouter.ai/">OpenRouter</a>*<br /><br /> `;
+
+      modalText.value = summaryCourtesyText + generatedContent;
+      showModal.value = true;
+    } else {
+      console.error(`Unexpected response structure from OpenRouter, check the model at https://openrouter.ai/models/${randomModel}`,
+        data.data.error.message);
+    }
+  } catch (error) {
+    console.error('Error generating summary:', error);
+    modalText.value = 'Error generating summary. Please try again later.';
+  } finally {
+    isTldrLoading.value = false;
   }
+
+  return commitsInPeriod;
+};
+
+onMounted(async () => {
+  await ensureDataFreshness()
+})
+
+watch(selectedPeriod, async () => {
+  await ensureDataFreshness()
 })
 </script>

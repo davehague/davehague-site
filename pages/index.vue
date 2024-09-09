@@ -72,8 +72,6 @@
       </section>
     </main>
 
-    <!-- <NuxtLink to="/stats2">Stats</NuxtLink> -->
-
     <SiteFooter />
   </div>
 </template>

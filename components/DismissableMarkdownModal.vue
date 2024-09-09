@@ -40,7 +40,6 @@ const closeModal = () => {
 
 <style scoped>
 .markdown-content {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   line-height: 1.6;
   color: #333;
   padding: 20px;
@@ -66,6 +65,22 @@ const closeModal = () => {
   line-height: 1.25;
 }
 
+.markdown-content :deep(h3) {
+  font-size: 1.25em;
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.markdown-content :deep(h4) {
+  font-size: 1em;
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
 .markdown-content :deep(ul), .markdown-content :deep(ol) {
   padding-left: 1.5em;
   margin-bottom: 1em;
@@ -82,7 +97,6 @@ const closeModal = () => {
 
 .markdown-content :deep(ul > li::before) {
   content: '•';
-  color: #0366d6;
   font-weight: bold;
   display: inline-block;
   width: 1em;
@@ -91,7 +105,6 @@ const closeModal = () => {
 }
 
 .markdown-content :deep(ol > li::before) {
-  color: #0366d6;
   font-weight: bold;
   display: inline-block;
   width: 1em;
@@ -155,5 +168,11 @@ const closeModal = () => {
 
 .markdown-content :deep(tr:nth-child(2n)) {
   background-color: #f6f8fa;
+}
+
+.markdown-content :deep(hr) {
+  border: 0;
+  border-top: 1px solid #dfe2e5;
+  margin: 24px 0;
 }
 </style>
