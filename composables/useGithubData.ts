@@ -12,7 +12,7 @@ export function useGithubData() {
     try {
       const sinceDate = new Date(since);
       const formattedSince = sinceDate.toISOString();
-      
+
       let response;
       if (import.meta.server) {
         // Server-side: use GitHub API directly
@@ -25,17 +25,19 @@ export function useGithubData() {
         });
       } else {
         // Client-side: use Nuxt API route
-        response = await fetch(`/api/github/repos?since=${encodeURIComponent(formattedSince)}`);
+        response = await fetch(
+          `/api/github/repos?since=${encodeURIComponent(formattedSince)}`
+        );
       }
 
       if (!response.ok) {
-        throw new Error('Failed to fetch repositories');
+        throw new Error("Failed to fetch repositories");
       }
 
       const data = await response.json();
-      
+
       // Filter repos on the server side when using GitHub API directly
-      const filteredData = import.meta.server 
+      const filteredData = import.meta.server
         ? data.filter((repo: any) => new Date(repo.pushed_at) >= sinceDate)
         : data;
 
@@ -43,52 +45,117 @@ export function useGithubData() {
         id: repo.id,
         name: repo.name,
         full_name: repo.full_name,
-        owner: repo.full_name.split('/')[0],
+        owner: repo.full_name.split("/")[0],
         html_url: repo.html_url,
         updated_at: repo.updated_at,
-        pushed_at: repo.pushed_at
+        pushed_at: repo.pushed_at,
       }));
     } catch (error) {
-      console.error('Error fetching repositories:', error);
+      console.error("Error fetching repositories:", error);
       return [];
     }
   };
 
-  const fetchCommits = async (repo_owner: string, repo: string, since: string): Promise<GitHubCommit[]> => {
-    try {
-      let response;
-      if (import.meta.server) {
-        // Server-side: use GitHub API directly
-        const token = process.env.GITHUB_TOKEN;
-        const url = `https://api.github.com/repos/${repo_owner}/${repo}/commits?since=${since}`;
-        response = await fetch(url, {
-          headers: {
-            Authorization: `token ${token}`,
-            Accept: "application/vnd.github.v3+json",
-          },
-        });
-      } else {
-        // Client-side: use Nuxt API route
-        const url = `/api/github/commits?repo_owner=${encodeURIComponent(repo_owner)}&repo=${encodeURIComponent(repo)}&since=${encodeURIComponent(since)}`;
-        response = await fetch(url);
-      }
+  const getBranches = async (
+    repo_owner: string,
+    repo: string
+  ): Promise<Branch[]> => {
+    const url = `/api/github/branches?repo_owner=${encodeURIComponent(
+      repo_owner
+    )}&repo=${encodeURIComponent(repo)}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch branches: ${response.statusText}`);
+    }
+    return response.json();
+  };
 
+  interface GitHubCommit {
+    commit_id: string;
+    author_name: string;
+    author_email: string;
+    author_username?: string;
+    author_date: string;
+    message: string;
+    html_url: string;
+  }
+
+  interface Branch {
+    name: string;
+  }
+
+  const fetchCommits = async (
+    repo_owner: string,
+    repo: string,
+    since: string
+  ): Promise<GitHubCommit[]> => {
+    const allCommits: GitHubCommit[] = [];
+
+    const fetchFromGitHub = async (
+      url: string,
+      headers: HeadersInit = {}
+    ): Promise<any> => {
+      const response = await fetch(url, { headers });
       if (!response.ok) {
-        throw new Error(`Failed to fetch commits for repo ${repo}`);
+        throw new Error(`GitHub API request failed: ${response.statusText}`);
       }
-      const data = await response.json();
-      console.log('Found ', data.length, ' commits for repo ', repo, 'since ', since);
-      return data.map((commit: any) => ({
+      return response.json();
+    };
+
+    const processCommits = (commits: any[]): GitHubCommit[] => {
+      return commits.map((commit: any) => ({
         commit_id: commit.sha,
         author_name: commit.commit.author.name,
         author_email: commit.commit.author.email,
         author_username: commit.author?.login,
         author_date: commit.commit.author.date,
         message: commit.commit.message,
-        html_url: commit.html_url
+        html_url: commit.html_url,
       }));
+    };
+
+    try {
+      let branches: Branch[];
+      const headers: HeadersInit = {};
+
+      if (import.meta.server) {
+        // Server-side: use GitHub API directly
+        const token = process.env.GITHUB_TOKEN;
+        headers.Authorization = `token ${token}`;
+        headers.Accept = "application/vnd.github.v3+json";
+
+        const branchesUrl = `https://api.github.com/repos/${repo_owner}/${repo}/branches`;
+        branches = await fetchFromGitHub(branchesUrl, headers);
+      } else {
+        // Client-side: use Nuxt API route
+        const branchesUrl = `/api/github/branches?repo_owner=${encodeURIComponent(
+          repo_owner
+        )}&repo=${encodeURIComponent(repo)}`;
+        branches = await fetchFromGitHub(branchesUrl);
+      }
+
+      for (const branch of branches) {
+        console.log("Fetching commits for branch:", branch.name);
+        let url: string;
+
+        if (import.meta.server) {
+          url = `https://api.github.com/repos/${repo_owner}/${repo}/commits?sha=${branch.name}&since=${since}`;
+        } else {
+          url = `/api/github/commits?repo_owner=${encodeURIComponent(
+            repo_owner
+          )}&repo=${encodeURIComponent(repo)}&branch=${encodeURIComponent(
+            branch.name
+          )}&since=${encodeURIComponent(since)}`;
+        }
+
+        const branchCommits = await fetchFromGitHub(url, headers);
+        allCommits.push(...processCommits(branchCommits));
+      }
+
+      console.log("Found", allCommits.length, "commits for repo", repo, "since", since);
+      return allCommits;
     } catch (error) {
-      console.error('Error fetching commits:', error);
+      console.error("Error fetching commits:", error);
       return [];
     }
   };
