@@ -1,5 +1,4 @@
 <template>
-  <SiteHeader />
   <section id="github-activity" class="py-20 bg-white">
     <div class="container mx-auto px-6">
       <h2 class="text-3xl font-bold mb-8 text-gray-900 text-center">My GitHub Activity</h2>
@@ -70,8 +69,6 @@
   </div>
 
   <DismissableMarkdownModal v-if="showModal" :isVisible="showModal" :content="modalText" @close="showModal = false" />
-
-  <SiteFooter />
 </template>
 
 <script setup>
