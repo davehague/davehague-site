@@ -17,16 +17,21 @@
         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"></textarea>
     </div>
 
-    <!-- New markdown editor and preview section -->
+    <!-- Markdown editor and preview section -->
     <div>
-      <label for="content" class="block text-sm font-medium text-gray-700">Content</label>
+      <div class="flex justify-between items-center mb-2">
+        <label for="content" class="block text-sm font-medium text-gray-700">Content</label>
+        <button type="button" @click="togglePreview" class="text-sm text-indigo-600 hover:text-indigo-800">
+          {{ showPreview ? 'Hide Preview' : 'Show Preview' }}
+        </button>
+      </div>
       <div class="flex mt-1 space-x-4">
-        <div class="w-1/2">
+        <div :class="{ 'w-full': !showPreview, 'w-1/2': showPreview }">
           <textarea v-model="formData.content" id="content" rows="20" required
             class="block w-full rounded-md p-2 border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 font-mono"
             @input="updatePreview"></textarea>
         </div>
-        <div class="w-1/2">
+        <div v-if="showPreview" class="w-1/2">
           <div v-html="markdownPreview"
             class="markdown-content prose max-w-none p-4 border rounded-md bg-white overflow-auto h-[490px]"></div>
         </div>
@@ -72,7 +77,8 @@ const emit = defineEmits<{
   (e: 'submit', data: Partial<BlogPost> & { password: string }): void
 }>()
 
-const markdownPreview = ref('')
+const markdownPreview = ref('');
+const showPreview = ref(false);
 
 const formData = ref<Partial<BlogPost>>({
   title: '',
@@ -95,8 +101,17 @@ const goToManagePage = () => {
 }
 
 const updatePreview = useDebounceFn(async () => {
-  markdownPreview.value = await marked(formData.value.content || '')
+  if (showPreview.value) {
+    markdownPreview.value = await marked(formData.value.content || '')
+  }
 }, 300)
+
+const togglePreview = () => {
+  showPreview.value = !showPreview.value
+  if (showPreview.value) {
+    updatePreview()
+  }
+}
 
 onMounted(() => {
   updatePreview()
