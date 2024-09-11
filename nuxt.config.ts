@@ -6,6 +6,9 @@ export default defineNuxtConfig({
   css: ["~/assets/styles.css"],
   plugins: ['~/plugins/analytics.client.ts'],
   ignore: ["experiments", "posts"],
+  runtimeConfig: {
+    adminToken: process.env.ADMIN_TOKEN,
+  },
 
   app: {
     head: {

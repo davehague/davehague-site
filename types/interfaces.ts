@@ -17,3 +17,13 @@ export interface GitHubCommit {
   message: string;
   html_url: string;
 }
+
+export interface BlogPost {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  created_at: Date;
+  updated_at: Date;
+}
