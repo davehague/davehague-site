@@ -19,8 +19,8 @@ async function startPeriodicUpdate(nitroApp: any) {
       console.log("Running scheduled Github data update");
       await checkAndUpdateGithubData();
     },
-    { schedule: "0 0 * * *" }
-  ); // "every day at midnight"
+    { schedule: "0 0,12 * * *" }
+  ); // "every day at noon and midnight"
 
   // Run the initial update
   await checkAndUpdateGithubData();
