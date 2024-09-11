@@ -1,5 +1,6 @@
 <template>
   <form @submit.prevent="submitForm" class="space-y-4">
+    <!-- Form fields (title, slug, excerpt) -->
     <div>
       <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
       <input v-model="formData.title" id="title" type="text" required
@@ -15,11 +16,24 @@
       <textarea v-model="formData.excerpt" id="excerpt" rows="3"
         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"></textarea>
     </div>
+
+    <!-- New markdown editor and preview section -->
     <div>
       <label for="content" class="block text-sm font-medium text-gray-700">Content</label>
-      <textarea v-model="formData.content" id="content" rows="10" required
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"></textarea>
+      <div class="flex mt-1 space-x-4">
+        <div class="w-1/2">
+          <textarea v-model="formData.content" id="content" rows="20" required
+            class="block w-full rounded-md p-2 border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 font-mono"
+            @input="updatePreview"></textarea>
+        </div>
+        <div class="w-1/2">
+          <div v-html="markdownPreview"
+            class="markdown-content prose max-w-none p-4 border rounded-md bg-white overflow-auto h-[490px]"></div>
+        </div>
+      </div>
     </div>
+
+    <!-- Password field and buttons -->
     <div>
       <label for="admin-password" class="block text-sm font-medium text-gray-700">Admin Password</label>
       <input v-model="password" id="admin-password" name="admin-password" type="password"
@@ -36,14 +50,16 @@
         Cancel
       </button>
     </div>
-
   </form>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { type BlogPost } from '~/types/interfaces'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useDebounceFn } from '@vueuse/core'
+import { marked } from 'marked'
+import { type BlogPost } from '~/types/interfaces'
+import '../assets/marked.css';
 
 const router = useRouter()
 
@@ -55,6 +71,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'submit', data: Partial<BlogPost> & { password: string }): void
 }>()
+
+const markdownPreview = ref('')
 
 const formData = ref<Partial<BlogPost>>({
   title: '',
@@ -75,4 +93,12 @@ const submitForm = () => {
 const goToManagePage = () => {
   router.push('/blog/manage')
 }
+
+const updatePreview = useDebounceFn(async () => {
+  markdownPreview.value = await marked(formData.value.content || '')
+}, 300)
+
+onMounted(() => {
+  updatePreview()
+})
 </script>

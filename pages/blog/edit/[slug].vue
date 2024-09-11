@@ -1,5 +1,5 @@
 <template>
-  <div class="container mx-auto px-4 py-20 max-w-3xl">
+  <div class="container mx-auto px-4 py-20">
     <h1 class="text-4xl font-bold mb-6">Edit Blog Post</h1>
     <BlogForm v-if="post" :is-edit="true" :initial-data="post" @submit="updatePost" />
     <p v-else>Loading...</p>
