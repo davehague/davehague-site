@@ -44,21 +44,8 @@ const searchQuery = ref('')
 const currentPage = ref(1)
 const postsPerPage = 9
 
-const fetchBlogPosts = async () => {
-  const { data, error } = await supabase
-    .from('blogs')
-    .select('id, title, slug, excerpt')
-    .order('created_at', { ascending: false })
-
-  if (error) {
-    console.error('Error fetching blog posts:', error)
-  } else {
-    blogPosts.value = data
-  }
-}
-
 const filteredPosts = computed(() => {
-  if (!searchQuery.value) return blogStore.blogPosts
+  if (!searchQuery.value) return blogStore.publishedPosts
   return blogStore.searchPosts(searchQuery.value)
 })
 

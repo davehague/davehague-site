@@ -10,7 +10,7 @@
       <label for="slug" class="block text-sm font-medium text-gray-700">Slug</label>
       <input v-model="slug" id="slug" type="text" required
         class="mt-1 block w-full rounded-md p-2 border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-        <p v-if="!isSlugUnique" class="text-sm text-red-500 italic">This slug is already in use.</p>
+      <p v-if="!isSlugUnique" class="text-sm text-red-500 italic">This slug is already in use.</p>
     </div>
     <div>
       <label for="excerpt" class="block text-sm font-medium text-gray-700">Excerpt</label>
@@ -55,6 +55,13 @@
         class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
         Cancel
       </button>
+      <div class="ml-4">
+        <label class="flex items-center py-2">
+          <input type="checkbox" v-model="formData.is_draft"
+            class="form-checkbox h-5 w-5 text-indigo-600 transition duration-150 ease-in-out">
+          <span class="ml-2 text-sm text-gray-700">Mark as draft</span>
+        </label>
+      </div>
     </div>
   </form>
 </template>
@@ -88,12 +95,28 @@ const formData = ref<Partial<BlogPost>>({
   slug: '',
   excerpt: '',
   content: '',
+  is_draft: false,
   ...props.initialData
 })
 
-const title = ref('')
-const slug = ref('')
-const isSlugUnique = computed(() => blogStore.isSlugUnique(slug.value))
+const title = computed({
+  get: () => formData.value.title || '',
+  set: (value) => {
+    formData.value.title = value
+    if (!props.isEdit) {
+      generateSlug()
+    }
+  }
+})
+
+const slug = computed({
+  get: () => formData.value.slug || '',
+  set: (value) => formData.value.slug = value
+})
+
+const isSlugUnique = computed(() =>
+  props.isEdit ? true : blogStore.isSlugUnique(slug.value)
+)
 
 function generateSlug() {
   slug.value = title.value.trim()
@@ -132,7 +155,6 @@ const togglePreview = () => {
 
 onMounted(async () => {
   blogStore.fetchBlogPosts()
-  console.log(blogStore.slugs)
   updatePreview()
 })
 </script>

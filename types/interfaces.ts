@@ -26,4 +26,5 @@ export interface BlogPost {
   content: string;
   created_at: Date;
   updated_at: Date;
+  is_draft: boolean;
 }

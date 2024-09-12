@@ -1,5 +1,13 @@
 <template>
-  <div class="container mx-auto px-4 py-20">
+  <!-- Back arrow button -->
+  <router-link to="/blog/manage"
+    class="absolute top-20 left-8 flex items-center text-blue-500 hover:text-blue-600 font-semibold transition duration-300 ease-in-out">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+    </svg>
+    Back to manage
+  </router-link>
+  <div class="container mx-auto px-4 py-24">
     <h1 class="text-4xl font-bold mb-6">Edit Blog Post</h1>
     <BlogForm v-if="post" :is-edit="true" :initial-data="post" @submit="updatePost" />
     <p v-else>Loading...</p>

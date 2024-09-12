@@ -7,11 +7,14 @@
       </NuxtLink>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div v-for="post in posts" :key="post.id" class="bg-white shadow-md rounded-lg overflow-hidden">
+      <div v-for="post in blogStore.blogPosts" :key="post.id" class="bg-white shadow-md rounded-lg overflow-hidden">
         <div class="flex flex-col h-full p-4">
-          <NuxtLink :to="`/blog/${post.slug}`" class="text-xl font-semibold mb-2 hover:text-blue-600">
-            {{ post.title }}
-          </NuxtLink>
+          <div class="flex justify-between items-center mb-2">
+            <NuxtLink :to="`/blog/${post.slug}`" class="text-xl font-semibold hover:text-blue-600">
+              {{ post.title }}
+            </NuxtLink>
+            <span v-if="post.is_draft" class="bg-yellow-200 text-yellow-800 px-2 py-1 rounded text-sm">Draft</span>
+          </div>
           <p class="text-gray-600 mb-4 flex-grow">{{ post.excerpt }}</p>
           <div class="flex justify-end space-x-2 mt-auto">
             <NuxtLink :to="`/blog/edit/${post.slug}`"
@@ -54,21 +57,16 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { type BlogPost } from '~/types/interfaces'
+import { useBlogStore } from '~/stores/blogStore'
+import type { BlogPost } from '~/types/interfaces'
 
-const posts = ref<BlogPost[]>([])
+const blogStore = useBlogStore()
 const showDeleteModal = ref(false)
 const postToDelete = ref<BlogPost | null>(null)
 const deletePassword = ref('')
 
 const fetchPosts = async () => {
-  try {
-    const response = await fetch('/api/blog')
-    if (!response.ok) throw new Error('Failed to fetch blog posts')
-    posts.value = await response.json()
-  } catch (error) {
-    console.error('Error fetching blog posts:', error)
-  }
+  await blogStore.fetchBlogPosts(true, true)
 }
 
 const openDeleteModal = (post: BlogPost) => {

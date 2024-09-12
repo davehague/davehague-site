@@ -2,24 +2,29 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { supabase } from '@/utils/supabaseClient'
 
-interface BlogPost {
-  id: number
-  title: string
-  slug: string
-  excerpt: string
-  content: string
-  created_at: string
+export interface BlogPost {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  created_at: Date;
+  updated_at: Date;
+  is_draft: boolean;
 }
 
 export const useBlogStore = defineStore('blog', () => {
   const blogPosts = ref<BlogPost[]>([])
   const loading = ref(false)
   const lastFetchTime = ref<number | null>(null)
-  const fetchInterval = 30 * 60 * 1000 // 30 minutes
+  const fetchInterval = 5 * 60 * 1000 // 5 minutes in milliseconds
 
-  const slugs = computed(() => blogPosts.value.map(post => post.slug))
+  const publishedPosts = computed(() => blogPosts.value.filter(post => !post.is_draft))
+  const draftPosts = computed(() => blogPosts.value.filter(post => post.is_draft))
+  const allSlugs = computed(() => blogPosts.value.map(post => post.slug))
+  const publishedSlugs = computed(() => publishedPosts.value.map(post => post.slug))
 
-  async function fetchBlogPosts(forceRefresh = false) {
+  async function fetchBlogPosts(forceRefresh = false, includeDrafts = false) {
     const now = Date.now()
     if (
       !forceRefresh &&
@@ -33,10 +38,16 @@ export const useBlogStore = defineStore('blog', () => {
 
     loading.value = true
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('blogs')
-        .select('id, title, slug, excerpt, content, created_at')
+        .select('id, title, slug, excerpt, content, created_at, updated_at, is_draft')
         .order('created_at', { ascending: false })
+
+      if (!includeDrafts) {
+        query = query.eq('is_draft', false)
+      }
+
+      const { data, error } = await query
 
       if (error) throw error
 
@@ -50,20 +61,23 @@ export const useBlogStore = defineStore('blog', () => {
   }
 
   function isSlugUnique(slug: string): boolean {
-    return !slugs.value.includes(slug)
+    return !allSlugs.value.includes(slug)
   }
 
-  function getPostBySlug(slug: string): BlogPost | undefined {
-    return blogPosts.value.find(post => post.slug === slug)
+  function getPostBySlug(slug: string, includeDrafts = false): BlogPost | undefined {
+    return includeDrafts
+      ? blogPosts.value.find(post => post.slug === slug)
+      : publishedPosts.value.find(post => post.slug === slug)
   }
 
   function getRecentPosts(count: number = 6): BlogPost[] {
-    return blogPosts.value.slice(0, count)
+    return publishedPosts.value.slice(0, count)
   }
 
-  function searchPosts(query: string): BlogPost[] {
+  function searchPosts(query: string, includeDrafts = false): BlogPost[] {
     const lowercaseQuery = query.toLowerCase()
-    return blogPosts.value.filter(post => 
+    const postsToSearch = includeDrafts ? blogPosts.value : publishedPosts.value
+    return postsToSearch.filter(post => 
       post.title.toLowerCase().includes(lowercaseQuery) ||
       post.excerpt.toLowerCase().includes(lowercaseQuery) || 
       post.content.toLowerCase().includes(lowercaseQuery)
@@ -71,9 +85,12 @@ export const useBlogStore = defineStore('blog', () => {
   }
 
   return { 
-    blogPosts, 
+    blogPosts,
+    publishedPosts,
+    draftPosts,
     loading, 
-    slugs, 
+    allSlugs,
+    publishedSlugs,
     fetchBlogPosts, 
     isSlugUnique, 
     getPostBySlug, 
