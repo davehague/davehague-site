@@ -3,18 +3,19 @@
     <!-- Form fields (title, slug, excerpt) -->
     <div>
       <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
-      <input v-model="formData.title" id="title" type="text" required
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+      <input v-model="title" id="title" type="text" required @input="generateSlug"
+        class="mt-1 block w-full rounded-md p-2 border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
     </div>
     <div>
       <label for="slug" class="block text-sm font-medium text-gray-700">Slug</label>
-      <input v-model="formData.slug" id="slug" type="text" required
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+      <input v-model="slug" id="slug" type="text" required
+        class="mt-1 block w-full rounded-md p-2 border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+        <p v-if="!isSlugUnique" class="text-sm text-red-500 italic">This slug is already in use.</p>
     </div>
     <div>
       <label for="excerpt" class="block text-sm font-medium text-gray-700">Excerpt</label>
       <textarea v-model="formData.excerpt" id="excerpt" rows="3"
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"></textarea>
+        class="mt-1 block w-full rounded-md p-2 border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"></textarea>
     </div>
 
     <!-- Markdown editor and preview section -->
@@ -28,7 +29,7 @@
       <div class="flex mt-1 space-x-4">
         <div :class="{ 'w-full': !showPreview, 'w-1/2': showPreview }">
           <textarea v-model="formData.content" id="content" rows="20" required
-            class="block w-full rounded-md p-2 border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 font-mono"
+            class="block w-full rounded-md p-4 border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 font-mono"
             @input="updatePreview"></textarea>
         </div>
         <div v-if="showPreview" class="w-1/2">
@@ -43,7 +44,7 @@
       <label for="admin-password" class="block text-sm font-medium text-gray-700">Admin Password</label>
       <input v-model="password" id="admin-password" name="admin-password" type="password"
         autocomplete="current-password" required
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+        class="mt-1 block w-full rounded-md p-2 border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
     </div>
     <div class="flex gap-2">
       <button type="submit"
@@ -64,9 +65,11 @@ import { useRouter } from 'vue-router'
 import { useDebounceFn } from '@vueuse/core'
 import { marked } from 'marked'
 import { type BlogPost } from '~/types/interfaces'
+import { useBlogStore } from '~/stores/blogStore'
 import '../assets/marked.css';
 
 const router = useRouter()
+const blogStore = useBlogStore()
 
 const props = defineProps<{
   initialData?: Partial<BlogPost>
@@ -88,11 +91,25 @@ const formData = ref<Partial<BlogPost>>({
   ...props.initialData
 })
 
-const password = ref('')
+const title = ref('')
+const slug = ref('')
+const isSlugUnique = computed(() => blogStore.isSlugUnique(slug.value))
 
+function generateSlug() {
+  slug.value = title.value.trim()
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+}
+
+const password = ref('')
 const submitButtonText = computed(() => props.isEdit ? 'Update Post' : 'Create Post')
 
 const submitForm = () => {
+  if (!isSlugUnique.value) {
+    alert('Please choose a unique slug')
+    return
+  }
   emit('submit', { ...formData.value, password: password.value })
 }
 
@@ -113,7 +130,9 @@ const togglePreview = () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await blogStore.fetchSlugs()
+  console.log(blogStore.slugs)
   updatePreview()
 })
 </script>

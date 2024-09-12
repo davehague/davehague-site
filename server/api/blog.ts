@@ -9,6 +9,24 @@ export default defineEventHandler(async (event) => {
     const query = getQuery(event)
     const slug = query.slug as string
 
+    const getSlugs = query.getSlugs === 'true'
+
+    if (getSlugs) {
+      const { data, error } = await supabase
+        .from('blogs')
+        .select('slug')
+  
+      if (error) {
+        throw createError({
+          statusCode: 500,
+          statusMessage: 'Error fetching blog slugs',
+        })
+      }
+  
+      return data.map(item => item.slug)
+    }
+  
+
     if (!slug) {
       // If no slug is provided, return all blog posts
       const { data, error } = await supabase
