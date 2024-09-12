@@ -9,7 +9,9 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div v-for="post in posts" :key="post.id" class="bg-white shadow-md rounded-lg overflow-hidden">
         <div class="flex flex-col h-full p-4">
-          <h2 class="text-xl font-semibold mb-2">{{ post.title }}</h2>
+          <NuxtLink :to="`/blog/${post.slug}`" class="text-xl font-semibold mb-2 hover:text-blue-600">
+            {{ post.title }}
+          </NuxtLink>
           <p class="text-gray-600 mb-4 flex-grow">{{ post.excerpt }}</p>
           <div class="flex justify-end space-x-2 mt-auto">
             <NuxtLink :to="`/blog/edit/${post.slug}`"

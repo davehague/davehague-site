@@ -3,18 +3,24 @@
     <div class="container mx-auto px-6">
       <h2 class="text-3xl font-bold mb-8 text-gray-900">Blog</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div v-for="post in blogPosts" :key="post.id" class="bg-gray-100 rounded-lg overflow-hidden shadow-lg">
+        <div v-for="post in recentPosts" :key="post.id" class="bg-gray-100 rounded-lg overflow-hidden shadow-lg">
           <div class="p-6">
-            <h3 class="text-xl font-semibold mb-2 text-gray-900">{{ post.title }}</h3>
+            <div class="mb-4">
+              <NuxtLink :to="`/blog/${post.slug}`" class="text-xl font-semibold hover:text-blue-600">
+                {{ post.title }}
+              </NuxtLink>
+            </div>
             <p class="text-gray-600 mb-4">{{ post.excerpt }}</p>
-            <NuxtLink 
-              :to="`/blog/${post.slug}`"
-              class="text-blue-600 hover:underline"
-            >
+            <NuxtLink :to="`/blog/${post.slug}`" class="text-blue-600 hover:underline">
               Read More
             </NuxtLink>
           </div>
         </div>
+      </div>
+      <div class="mt-8 text-center">
+        <NuxtLink to="/blog" class="text-blue-600 hover:underline font-medium">
+          See more posts &rarr;
+        </NuxtLink>
       </div>
     </div>
   </section>
@@ -22,27 +28,13 @@
 
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { supabase } from '@/utils/supabaseClient'
+import { onMounted } from 'vue'
+import { useBlogStore } from '@/stores/blogStore'
 
-const blogPosts = ref([])
-
-const fetchBlogPosts = async () => {
-  const { data, error } = await supabase
-    .from('blogs')
-    .select('id, title, slug, excerpt')
-    .order('created_at', { ascending: false })
-    .limit(6)
-
-  if (error) {
-    console.error('Error fetching blog posts:', error)
-  } else {
-    blogPosts.value = data
-    console.log(data)
-  }
-}
+const blogStore = useBlogStore()
+const recentPosts = computed(() => blogStore.getRecentPosts(3))
 
 onMounted(() => {
-  fetchBlogPosts()
+  blogStore.fetchBlogPosts()
 })
 </script>

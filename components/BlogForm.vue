@@ -131,7 +131,7 @@ const togglePreview = () => {
 }
 
 onMounted(async () => {
-  await blogStore.fetchSlugs()
+  blogStore.fetchBlogPosts()
   console.log(blogStore.slugs)
   updatePreview()
 })

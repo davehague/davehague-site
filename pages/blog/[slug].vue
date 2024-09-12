@@ -2,7 +2,7 @@
   <div class="flex-grow flex items-start justify-center py-12">
     <div v-if="post" class="container mx-auto p-6 max-w-3xl">
       <h1 class="text-4xl font-bold mb-6">{{ post.title }}</h1>
-      <div class="prose lg:prose-xl" v-html="renderedContent"></div>
+      <div class="prose lg:prose-xl markdown-content" v-html="renderedContent"></div>
     </div>
     <div v-else class="text-center">
       <p>Loading...</p>
@@ -16,6 +16,7 @@ import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { supabase } from "@/utils/supabaseClient";
 import { marked } from 'marked'
+import '../assets/marked.css';
 
 const route = useRoute()
 const post = ref(null)
