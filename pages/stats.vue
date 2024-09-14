@@ -100,10 +100,6 @@ const averageCommitsPerDay = (weekdaysOnly) => {
   const commitsInPeriod = githubStore.getCommitsByPeriod(selectedPeriod.value);
   const commitMessagesCount = commitsInPeriod.reduce((count, commit) => count + commit.messages.length, 0);
 
-
-  console.log('Commits in period:', commitsInPeriod);
-  console.log('Commit messages count:', commitMessagesCount);
-  
   const days = daysSincePeriod(selectedPeriod.value);
   
   const weekDaysInPeriod = getWeekdaysInPeriod(selectedPeriod.value);

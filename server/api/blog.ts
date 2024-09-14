@@ -60,7 +60,7 @@ export default defineEventHandler(async (event) => {
     return data as BlogPost
   } else if (method === 'POST') {
     const body = await readBody(event)
-    const { title, slug, excerpt, content, password } = body
+    const { title, slug, excerpt, content, password, is_draft } = body
 
     if (password !== process.env.ADMIN_TOKEN) {
       throw createError({
@@ -71,7 +71,7 @@ export default defineEventHandler(async (event) => {
 
     const { data, error } = await supabase
       .from('blogs')
-      .insert([{ title, slug, excerpt, content }])
+      .insert([{ title, slug, excerpt, content, is_draft }])
       .select()
       .single()
 
@@ -87,7 +87,7 @@ export default defineEventHandler(async (event) => {
     const query = getQuery(event)
     const slug = query.slug as string
     const body = await readBody(event)
-    const { title, newSlug, excerpt, content, password } = body
+    const { title, newSlug, excerpt, content, password, is_draft } = body
 
     if (password !== process.env.ADMIN_TOKEN) {
       throw createError({
@@ -98,7 +98,7 @@ export default defineEventHandler(async (event) => {
 
     const { data, error } = await supabase
       .from('blogs')
-      .update({ title, slug: newSlug, excerpt, content })
+      .update({ title, slug: newSlug, excerpt, content, is_draft })
       .eq('slug', slug)
       .select()
       .single()
