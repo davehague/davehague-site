@@ -17,7 +17,7 @@ export function useGithubData() {
       if (import.meta.server) {
         // Server-side: use GitHub API directly
         const token = process.env.GITHUB_TOKEN;
-        response = await fetch("https://api.github.com/user/repos", {
+        response = await fetch("https://api.github.com/user/repos?per_page=100", {
           headers: {
             Authorization: `token ${token}`,
             Accept: "application/vnd.github.v3+json",
@@ -35,6 +35,7 @@ export function useGithubData() {
       }
 
       const data = await response.json();
+      console.log("Fetched", data.length, "repositories", data.map((repo: any) => repo.full_name));
 
       // Filter repos on the server side when using GitHub API directly
       const filteredData = import.meta.server
