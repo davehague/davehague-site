@@ -70,7 +70,7 @@ const shippedProjects = [
 
 const emergingProjects = [
   {
-    id: 1,
+    id: 3,
     name: 'Commission Controls',
     description: 'Track and reconcile insurance commissions with your book of business.',
     icon: Coins,
@@ -80,18 +80,28 @@ const emergingProjects = [
     link: 'Coming soon',
   },
   {
-    id: 2,
+    id: 4,
     name: 'Prompt Central Station',
     description: 'Decouple prompt management from application code. Enable non-technical users to modify prompts and parameters without code changes.',
     icon: TrainFrontTunnel,
     techLanguages: 'Python',
     link: 'https://github.com/davehague/prompt-central-station/',
   },
+  {
+    id: 5,
+    name: 'Motes',
+    description: 'Write your entire life autobiography, one tweet at a time',
+    icon: NotebookPen,
+    techLanguages: 'Typescript',
+    techFrameworks: 'VueJS, NuxtJS',
+    techServices: 'Firebase',
+    link: 'https://timeline.davehague.com',
+  },
 ]
 
 const experiments = [
   {
-    id: 1,
+    id: 6,
     name: 'Pickleball Watcher',
     description: 'Never get locked out, get daily emails when new sessions are posted.',
     icon: ScanEye,
@@ -100,7 +110,7 @@ const experiments = [
     link: 'Coming soon',
   },
   {
-    id: 2,
+    id: 7,
     name: 'The Yoosz',
     description: 'The usual order from the usual places, shared with the usual people.',
     icon: Soup,
@@ -118,17 +128,7 @@ const experiments = [
   //   link: 'Coming soon',
   // },
   {
-    id: 4,
-    name: 'Motes',
-    description: 'Write your entire life autobiography, one tweet at a time',
-    icon: NotebookPen,
-    techLanguages: 'Typescript',
-    techFrameworks: 'VueJS, NuxtJS',
-    techServices: 'Supabase',
-    link: 'Coming soon',
-  },
-  {
-    id: 5,
+    id: 8,
     name: 'Caller Coach',
     description: 'Get a call from AI to keep you on track with your goals.',
     icon: PhoneIncoming,
@@ -136,7 +136,7 @@ const experiments = [
     link: 'https://github.com/davehague/caller_coach',
   },
   {
-    id: 6,
+    id: 9,
     name: 'Task Prioritizer',
     description: 'Compare tasks that you are considering to find your next top task.',
     icon: SquareCheckBig,
@@ -145,7 +145,7 @@ const experiments = [
     link: 'https://tasks.davehague.com/',
   },
   {
-    id: 7,
+    id: 10,
     name: 'LLM Desktop',
     description: 'Hotkey to your favorite LLM models.',
     icon: Keyboard,

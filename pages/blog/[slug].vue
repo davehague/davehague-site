@@ -8,7 +8,7 @@
     All blog posts
   </router-link>
 
-  <div class="flex-grow flex items-start justify-center py-12">
+  <div class="flex-grow flex items-start justify-center py-20">
     <div v-if="post" class="container mx-auto p-6 max-w-3xl">
       <h1 class="text-4xl font-bold mb-6">{{ post.title }}</h1>
       <div class="prose lg:prose-xl markdown-content" v-html="renderedContent"></div>

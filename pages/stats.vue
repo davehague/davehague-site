@@ -3,9 +3,9 @@
     <div class="container mx-auto px-6">
       <h2 class="text-3xl font-bold mb-8 text-gray-900 text-center">My GitHub Activity</h2>
 
-      <div class="mb-8 flex justify-center space-x-4">
+      <div class="mb-8 flex justify-center space-x-2 md:space-x-4">
         <button v-for="period in timePeriods" :key="period.value" @click="updateSelectedPeriod(period.value)"
-          class="px-4 py-2 rounded-full transition-colors duration-300"
+          class="px-2 md:px-4 py-2 rounded-md transition-colors duration-300 text-sm md:text-lg"
           :class="selectedPeriod === period.value ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'">
           {{ period.label }}
         </button>
