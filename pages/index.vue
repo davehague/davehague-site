@@ -21,15 +21,14 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div>
             <p class="text-lg mb-4 text-gray-700">
-              I'm a seasoned developer with a passion for building and shipping software, currently focused on Python
-              and TypeScript.
-              As a former .NET developer and engineering leader I bring a diverse skill set to every project.
-              I haven't yet seen a hat I'm unwilling or unable to put on.
+              I'm a seasoned developer with a passion for building and shipping software, currently focused on <span class="font-semibold italic">Python
+              and TypeScript.</span>
+              As a former .NET developer, Java Delevoper, integrations consultant, and engineering leader I bring a diverse skill set to every project. 
             </p>
             <p class="text-lg text-gray-700">
-              Recently, I've embarked on a journey of entrepreneurship, which means I'm working on my shipping muscle
+              Recently, I've embarked on a journey of entrepreneurship, which means I'm <em>working on my shipping muscle 💪</em>
               while I explore the
-              exciting world of generative AI and building solutions that solve real problems.
+              exciting world of <span class="font-semibold italic">generative AI</span> and building solutions that solve real problems.
             </p>
             <p class="text-lg mt-4 text-gray-700">
               I live in central Ohio with my wife, dog, and toddler, and I love to write software.

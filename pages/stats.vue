@@ -5,7 +5,7 @@
 
       <div class="mb-8 flex justify-center space-x-2 md:space-x-4">
         <button v-for="period in timePeriods" :key="period.value" @click="updateSelectedPeriod(period.value)"
-          class="px-2 md:px-4 py-2 rounded-md transition-colors duration-300 text-sm md:text-lg"
+          class="px-2 md:px-4 py-1 rounded-md transition-colors duration-300 text-sm md:text-lg"
           :class="selectedPeriod === period.value ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'">
           {{ period.label }}
         </button>
@@ -13,14 +13,48 @@
 
       <StackedBarChart :timeframe="selectedPeriod" class="mb-8" />
 
+      <!-- Commits -->
       <div class="text-center text-gray-700 mb-12">
-        <p v-if="averageCommitsPerDay(true) > 0">
-          <strong>{{ averageCommitsPerDay(true).toFixed(2) }}</strong> commits per weekday in this period.
-        </p>
-
+        <div class="flex flex-col" v-if="averageCommitsPerDay(true) > 0">
+          <p><strong>{{ averageCommitsPerDay(true).toFixed(2) }}</strong> commits per weekday in this period.</p>
+          <span 
+            @click="toggleCommitExplanation" 
+            class="mt-1 text-xs italic cursor-pointer text-blue-600 hover:text-blue-800 underline"
+          >
+            Why commits?
+          </span>
+        </div>
         <p v-else>
           No commits found in the selected period.
         </p>
+      </div>
+
+      <!-- Commit Explanation Popover -->
+      <div 
+        v-if="showCommitExplanation" 
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        @click="toggleCommitExplanation"
+      >
+        <div 
+          class="bg-white p-6 rounded-lg shadow-xl max-w-md"
+          @click.stop
+        >
+          <h3 class="text-lg font-semibold mb-2">Why Commits?</h3>
+          <p class="text-gray-700">
+            Commits (or lines of code, or hours per butt per seat) are not always indicative of value of the work delivered,
+            but it's one data point. It can still give a sense of the activity level in a project, at least compared to other projects.<br><br>
+            I tend to use commits as a "save point", for when I've got something of value to show for the work I've done.  However,
+            there definitely are one line "fixed a typo" commits too, and that's OK.<br><br>
+            On average though I think that commits are a somewhat useful metric, even if the fidelity may not be perfect.  
+            It keeps me motivated to see the progress I've made and the work I've put in, so I track them here on this page.
+          </p>
+          <button 
+            @click="toggleCommitExplanation" 
+            class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors duration-300"
+          >
+            OK
+          </button>
+        </div>
       </div>
 
       <div v-if="loading" class="text-center">
@@ -33,16 +67,18 @@
         <p class="mt-4 text-xl text-gray-700">No activity found for the selected period.</p>
       </div>
 
+      <!-- Project cards -->
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <div v-for="project in sortedProjects" :key="project.id"
-          class="bg-gray-100 rounded-lg p-6 shadow-md transition-transform duration-300 hover:scale-105">
-          <h3 class="text-2xl font-semibold mb-4 text-gray-900">{{ project.name }}</h3>
-          <p class="text-gray-600 mb-4">Last updated: {{ formatDate(project.updated_at) }}</p>
+          class="bg-gray-100 rounded-lg p-6 shadow-md">
+
           <a :href="project.html_url" target="_blank" rel="noopener noreferrer"
             class="text-blue-600 hover:text-blue-800 transition-colors duration-300 mb-4 block">
-            View on GitHub
+            <h3 class="text-lg font-semibold mb-2 underline text-blue-700 hover:text-blue-400">{{ project.name }}</h3>
           </a>
-          <h4 class="text-lg font-semibold mb-2 text-gray-900">Recent Commits:</h4>
+
+          <p class="text-gray-600 mb-4 text-sm italic">Last updated: {{ formatDate(project.updated_at) }}</p>
+          <h4 class="text-md font-semibold mb-2 text-gray-900">Recent Commits:</h4>
           <ul v-if="project.allCommits && project.allCommits.length" class="space-y-2">
             <li v-for="commit in project.allCommits.slice(0, 3)" :key="commit.commit_id"
               class="bg-white rounded p-2 shadow-sm">
@@ -77,11 +113,17 @@ import { getRandomLLMModel } from '@/utils/llm';
 
 
 const showModal = ref(false);
+const showCommitExplanation = ref(false)
+
 const modalText = ref('');
 const isTldrLoading = ref(false);
 
 const { selectedPeriod, projects, loading, timePeriods, daysSincePeriod, ensureDataFreshness, updateSelectedPeriod } = useChartUtils()
 const isSelectedPeriodShort = computed(() => daysSincePeriod(selectedPeriod.value) <= 60)
+
+const toggleCommitExplanation = () => {
+  showCommitExplanation.value = !showCommitExplanation.value
+}
 
 const sortedProjects = computed(() => {
   const startDate = getStartDate(selectedPeriod.value);
@@ -208,7 +250,6 @@ const giveTldr = async () => {
 
 onMounted(async () => {
   await ensureDataFreshness()
-  console.log('Projects:', projects.value);
 })
 
 watch(selectedPeriod, async () => {
