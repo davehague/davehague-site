@@ -59,7 +59,7 @@ const shippedProjects = [
   {
     id: 2,
     name: 'PromptBlocks',
-    description: 'A prompt library that allows for composability, shareability, tagging and categorization, and parameterization of prompts.',
+    description: 'A prompt library that enabled you to compose, share, tag, and parameterize your LLM prompts.',
     techLanguages: 'Typescript',
     techFrameworks: 'VueJS, NuxtJS',
     techServices: 'Supabase, LLMs, Mailjet, Vercel',
@@ -77,7 +77,7 @@ const emergingProjects = [
     techLanguages: 'Typescript, Python',
     techFrameworks: 'VueJS, NuxtJS, FastAPI',
     techServices: 'Postgres',
-    link: 'Coming soon',
+    link: 'Link coming soon',
   },
   {
     id: 4,
@@ -107,7 +107,7 @@ const experiments = [
     icon: ScanEye,
     techLanguages: 'Python',
     techServices: 'Mailjet',
-    link: 'Coming soon',
+    link: 'Link coming soon',
   },
   {
     id: 7,
@@ -117,7 +117,7 @@ const experiments = [
     techLanguages: 'Typescript',
     techFrameworks: 'VueJS, NuxtJS',
     techServices: 'Supabase',
-    link: 'Coming soon',
+    link: 'Link coming soon',
   },
   // {
   //   id: 3,
@@ -125,7 +125,7 @@ const experiments = [
   //   description: 'Stay on top of your home maintenance tasks and projects.',
   //   icon: PencilRuler,
   //   techLanguages: 'TBD',
-  //   link: 'Coming soon',
+  //   link: 'Link coming soon',
   // },
   {
     id: 8,

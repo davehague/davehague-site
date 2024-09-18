@@ -15,11 +15,7 @@
 
       <div class="text-center text-gray-700 mb-12">
         <p v-if="averageCommitsPerDay(true) > 0">
-          Averaging <strong>{{ averageCommitsPerDay(false).toFixed(2) }}</strong> commits per day in this period.
-        </p>
-
-        <p v-if="averageCommitsPerDay(true) > 0">
-          Averaging <strong>{{ averageCommitsPerDay(true).toFixed(2) }}</strong> commits per weekday in this period.
+          <strong>{{ averageCommitsPerDay(true).toFixed(2) }}</strong> commits per weekday in this period.
         </p>
 
         <p v-else>
@@ -38,7 +34,7 @@
       </div>
 
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div v-for="project in projects" :key="project.id"
+        <div v-for="project in sortedProjects" :key="project.id"
           class="bg-gray-100 rounded-lg p-6 shadow-md transition-transform duration-300 hover:scale-105">
           <h3 class="text-2xl font-semibold mb-4 text-gray-900">{{ project.name }}</h3>
           <p class="text-gray-600 mb-4">Last updated: {{ formatDate(project.updated_at) }}</p>
@@ -86,6 +82,15 @@ const isTldrLoading = ref(false);
 
 const { selectedPeriod, projects, loading, timePeriods, daysSincePeriod, ensureDataFreshness, updateSelectedPeriod } = useChartUtils()
 const isSelectedPeriodShort = computed(() => daysSincePeriod(selectedPeriod.value) <= 60)
+
+const sortedProjects = computed(() => {
+  const startDate = getStartDate(selectedPeriod.value);
+  return projects.value.slice().sort((a, b) => {
+    const aCommits = a.allCommits.filter(commit => new Date(commit.author_date) >= startDate).length;
+    const bCommits = b.allCommits.filter(commit => new Date(commit.author_date) >= startDate).length;
+    return bCommits - aCommits; // Sort in descending order
+  });
+});
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -203,6 +208,7 @@ const giveTldr = async () => {
 
 onMounted(async () => {
   await ensureDataFreshness()
+  console.log('Projects:', projects.value);
 })
 
 watch(selectedPeriod, async () => {

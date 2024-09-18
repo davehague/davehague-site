@@ -1,5 +1,4 @@
 <template>
-  <!-- Back arrow button -->
   <router-link to="/blog"
     class="absolute top-20 left-8 flex items-center text-blue-500 hover:text-blue-600 font-semibold transition duration-300 ease-in-out">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -10,7 +9,8 @@
 
   <div class="flex-grow flex items-start justify-center py-20">
     <div v-if="post" class="container mx-auto p-6 max-w-3xl">
-      <h1 class="text-4xl font-bold mb-6">{{ post.title }}</h1>
+      <h1 class="text-4xl font-bold mb-2">{{ post.title }}</h1>
+      <p class="text-sm italic text-gray-600 mb-6">{{ formatDate(post.updated_at) }}</p>
       <div class="prose lg:prose-xl markdown-content" v-html="renderedContent"></div>
     </div>
     <div v-else class="text-center">
@@ -19,18 +19,20 @@
   </div>
 </template>
 
-
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { supabase } from "@/utils/supabaseClient";
 import { marked } from 'marked'
 import '../assets/marked.css';
+import { formatDate } from '@/utils/date'
 
 const route = useRoute()
 const post = ref(null)
+const isLoading = ref(true)
 
 const fetchBlogPost = async () => {
+  isLoading.value = true
   const { data, error } = await supabase
     .from('blogs')
     .select('*')
@@ -42,11 +44,14 @@ const fetchBlogPost = async () => {
   } else {
     post.value = data
   }
+  isLoading.value = false
 }
 
 const renderedContent = computed(() => {
   return post.value ? marked.parse(post.value.content) : ''
 })
 
-fetchBlogPost()
+onMounted(async () => {
+  await fetchBlogPost()
+})
 </script>

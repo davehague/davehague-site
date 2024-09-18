@@ -15,6 +15,7 @@
             <NuxtLink :to="`/blog/${post.slug}`" class="text-xl font-semibold hover:text-blue-600">
               {{ post.title }}
             </NuxtLink>
+            <p class="text-sm text-gray-500 italic">{{ formatDate(post.updated_at) }}</p>
           </div>
 
           <p class="text-gray-600 mb-4">{{ post.excerpt }}</p>
@@ -38,6 +39,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useBlogStore } from '@/stores/blogStore'
+import { formatDate } from '@/utils/date'
 
 const blogStore = useBlogStore()
 const searchQuery = ref('')
