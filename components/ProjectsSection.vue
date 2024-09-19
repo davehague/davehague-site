@@ -133,7 +133,7 @@ const experiments = [
     description: 'Get a call from AI to keep you on track with your goals.',
     icon: PhoneIncoming,
     techLanguages: 'Python',
-    link: 'https://github.com/davehague/caller_coach',
+    link: 'Link coming soon', //'https://github.com/davehague/caller_coach',
   },
   {
     id: 9,

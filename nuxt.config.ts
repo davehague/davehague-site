@@ -4,7 +4,7 @@ export default defineNuxtConfig({
   },
 
   css: ["~/assets/styles.css"],
-  plugins: ['~/plugins/analytics.client.ts'],
+  plugins: ["~/plugins/analytics.client.ts"],
   ignore: ["experiments", "posts"],
   runtimeConfig: {
     adminToken: process.env.ADMIN_TOKEN,
@@ -42,7 +42,6 @@ export default defineNuxtConfig({
       ],
     },
   },
-
   modules: ["@nuxtjs/tailwindcss", "@pinia/nuxt"],
   compatibilityDate: "2024-09-05",
 });

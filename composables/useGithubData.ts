@@ -35,7 +35,7 @@ export function useGithubData() {
       }
 
       const data = await response.json();
-      console.log("Fetched", data.length, "repositories", data.map((repo: any) => repo.full_name));
+      //console.log("Fetched", data.length, "repositories", data.map((repo: any) => repo.full_name));
 
       // Filter repos on the server side when using GitHub API directly
       const filteredData = import.meta.server
