@@ -22,45 +22,77 @@
     </div>
 
     <!-- Content -->
-    <div v-if="activeTab === 'Blog Posts'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      <div v-for="post in displayedPosts" :key="post.id" class="bg-white rounded-lg overflow-hidden shadow-lg">
-        <div class="p-6">
-          <div class="mb-4">
-            <NuxtLink :to="`/blog/${post.slug}`" class="text-xl font-semibold hover:text-blue-600">
-              {{ post.title }}
+    <div v-if="activeTab === 'Blog Posts'">
+      <blockquote
+        className="relative p-4 mb-8 text-md italic border-l-4 bg-neutral-100 text-neutral-600 border-neutral-500 quote">
+        <div className="stylized-quote-mark absolute top-0 left-0 text-4xl text-neutral-500 mt-3 ml-4">
+          &ldquo;
+        </div>
+        <p className="ml-4 mb-4">
+          The thing that stops most of us from writing a compelling article that gets noticed is that most of us
+          don't write enough crappy articles. We're too afraid to fail publicly, to write something less than perfect.
+          But that's
+          exactly the opposite of what we need to be doing. Adam Grant, author of The Originals, nails it:
+          "You need a lot of bad ideas in order to get a few good ones. One of the best predictors of the greatness of a
+          classical composer
+          is the <span class="underline">sheer number of compositions that they've generated</span>. Bach, Beethoven,
+          and Mozart had to generate hundreds
+          and hundreds of compositions in order to get to a much smaller number of masterpieces. The starting point is
+          that if most of us
+          want to be more original, we have to generate more ideas." So my plea to you is write more, and don't worry if
+          every
+          blog isn't War and Peace.
+        </p>
+        <footer className="text-sm">
+          &mdash; Debbie Madden, <a
+            href="https://www.amazon.com/Hire-Women-Framework-Retaining-Technology-ebook/dp/B07G8QTJNH"
+            className="text-blue-600 hover:text-blue-800 transition-colors duration-300">
+            Hire Women: An Agile Framework for Hiring and Retaining Women in Technology
+          </a>
+        </footer>
+      </blockquote>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div v-for="post in displayedPosts" :key="post.id" class="bg-white rounded-lg overflow-hidden shadow-lg">
+          <div class="p-6">
+            <div class="mb-4">
+              <NuxtLink :to="`/blog/${post.slug}`" class="text-xl font-semibold hover:text-blue-600">
+                {{ post.title }}
+              </NuxtLink>
+              <p class="text-sm text-gray-500 italic">{{ formatDate(post.updated_at.toString()) }}</p>
+            </div>
+            <p class="text-gray-600 mb-4">{{ post.excerpt }}</p>
+            <NuxtLink :to="`/blog/${post.slug}`" class="text-blue-600 hover:underline">
+              Read More
             </NuxtLink>
-            <p class="text-sm text-gray-500 italic">{{ formatDate(post.updated_at.toString()) }}</p>
           </div>
-          <p class="text-gray-600 mb-4">{{ post.excerpt }}</p>
-          <NuxtLink :to="`/blog/${post.slug}`" class="text-blue-600 hover:underline">
-            Read More
-          </NuxtLink>
         </div>
       </div>
     </div>
 
-    <div v-else-if="activeTab === 'Gists'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      <div v-for="gist in displayedGists" :key="gist.id" class="bg-white rounded-lg overflow-hidden shadow-lg">
-        <div class="p-6">
-          <div class="mb-4">
-            <a :href="gist.html_url" target="_blank" rel="noopener noreferrer"
-              class="text-xl font-semibold hover:text-blue-600">
-              {{ gist.description || 'Untitled Gist' }}
-            </a>
-            <p class="text-sm text-gray-500 italic">Created: {{ formatDate(gist.created_at) }}</p>
-            <p class="text-sm text-gray-500 italic">Updated: {{ formatDate(gist.updated_at) }}</p>
+    <div v-else-if="activeTab === 'Gists'">
+      <p class="m-2 mb-8 italic">Gists are technical snippets stored on <a href="https://gist.github.com/">Github</a>. I've
+        used them
+        over time to keep little snippets of code and instructions that don't quite rise to the level of full
+        repository.
+        I'll frequently refer back to gists that I've written, and I hope you find these useful as well!</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div v-for="gist in displayedGists" :key="gist.id" class="bg-white rounded-lg overflow-hidden shadow-lg">
+          <div class="p-6">
+            <div class="mb-4">
+              <NuxtLink :to="`/gists/${gist.id}`" class="text-xl font-semibold hover:text-blue-600">
+                {{ gist.description || 'Untitled Gist' }}
+              </NuxtLink>
+              <p class="text-sm text-gray-500 italic">Updated: {{ formatDate(gist.updated_at) }}</p>
+            </div>
+            <div class="text-gray-600 mb-4">
+              <div v-for="file in Object.values(gist.files)" :key="file.filename">
+                {{ file.content.substring(0, 120) }}{{ file.content.length > 100 ? '...' : '' }}
+              </div>
+            </div>
+            <NuxtLink :to="`/gists/${gist.id}`" class="text-blue-600 hover:underline">
+              View Gist
+            </NuxtLink>
           </div>
-          <div class="text-gray-600 mb-4">
-            <p>Files:</p>
-            <ul class="list-disc list-inside">
-              <li v-for="(file, filename) in gist.files" :key="filename">
-                {{ filename }} ({{ file.language || 'Unknown language' }})
-              </li>
-            </ul>
-          </div>
-          <a :href="gist.html_url" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">
-            View Gist
-          </a>
         </div>
       </div>
     </div>
@@ -87,7 +119,7 @@ const gistsStore = useGistsStore()
 const searchQuery = ref('')
 const currentPage = ref(1)
 const postsPerPage = 9
-const activeTab = ref('Blog Posts')
+const activeTab = useState('blogActiveTab', () => 'Blog Posts')
 
 const filteredPosts = computed(() => {
   if (!searchQuery.value) return blogStore.publishedPosts

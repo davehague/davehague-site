@@ -6,7 +6,7 @@
         stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
       </svg>
-      All blog posts
+      Back to blog posts
     </router-link>
 
     <div class="flex-grow flex items-start justify-center py-20">
@@ -26,7 +26,7 @@
 import { useAsyncData } from '#app'
 import { marked } from 'marked'
 import { formatDate } from '@/utils/date'
-import '../assets/marked.css';
+import '@/assets/marked.css';
 
 const route = useRoute()
 

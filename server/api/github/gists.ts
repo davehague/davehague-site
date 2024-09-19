@@ -12,7 +12,6 @@ export default defineEventHandler(async (event: H3Event) => {
   }
 
   const token = process.env.GITHUB_TOKEN;
-  console.log('Fetching gists from https://api.github.com/gists');
   const response = await fetch("https://api.github.com/gists", {
     headers: {
       Authorization: `token ${token}`,
@@ -29,10 +28,22 @@ export default defineEventHandler(async (event: H3Event) => {
 
   const gists = await response.json();
   const sinceDate = new Date(since);
-  console.log('Filtering gists updated since:', sinceDate.toISOString());
   const filteredGists = gists.filter(
     (gist: any) => new Date(gist.updated_at) >= sinceDate
   );
 
-  return filteredGists;
+  const gistsWithContent = await Promise.all(
+    filteredGists.map(async (gist: any) => {
+      const filesWithContent = await Promise.all(
+        Object.values(gist.files).map(async (file: any) => {
+          const rawResponse = await fetch(file.raw_url);
+          const content = await rawResponse.text();
+          return { ...file, content };
+        })
+      );
+      return { ...gist, files: filesWithContent };
+    })
+  );
+
+  return gistsWithContent;
 });
