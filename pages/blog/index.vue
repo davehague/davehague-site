@@ -1,22 +1,32 @@
 <template>
   <div class="container mx-auto px-4 py-20">
     <!-- Search bar -->
-    <div class="mb-6">
+    <div class="mb-6 relative">
       <input v-model="searchQuery" type="text" placeholder="Search blog posts and gists..."
-        class="w-full p-2 border border-gray-300 rounded" @input="searchContent" />
+        class="w-full p-2 pr-10 border border-gray-300 rounded" @input="debouncedSearch" />
+      <button v-if="searchQuery" @click="clearSearch"
+        class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+        ✕
+      </button>
     </div>
 
     <!-- Tabs -->
     <div class="mb-6">
       <div class="flex space-x-1 rounded-xl bg-blue-900/20 p-1">
         <button v-for="tab in ['Blog Posts', 'Gists']" :key="tab" @click="activeTab = tab" :class="[
-          'w-full rounded-lg py-2.5 text-sm font-medium leading-5',
+          'w-full rounded-lg py-2.5 text-sm font-semibold leading-5 transition-colors',
           'ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2',
           activeTab === tab
             ? 'bg-white shadow text-blue-700'
-            : 'text-blue-100 hover:bg-white/[0.12] hover:text-white'
-        ]">
-          {{ tab }}
+            : 'text-blue-900 hover:bg-blue-200 hover:text-blue-800'
+        ]" :aria-selected="activeTab === tab" role="tab">
+          <span class="flex items-center justify-center">
+            {{ tab }}
+            <span v-if="getIndicatorCount(tab) > 0"
+              class="ml-3 px-2 py-0.5 text-xs font-bold text-white bg-blue-300 rounded-full">
+              {{ getIndicatorCount(tab) }}
+            </span>
+          </span>
         </button>
       </div>
     </div>
@@ -31,17 +41,13 @@
         <p className="ml-4 mb-4">
           The thing that stops most of us from writing a compelling article that gets noticed is that most of us
           don't write enough crappy articles. We're too afraid to fail publicly, to write something less than perfect.
-          But that's
-          exactly the opposite of what we need to be doing. Adam Grant, author of The Originals, nails it:
+          But that's exactly the opposite of what we need to be doing. Adam Grant, author of The Originals, nails it:
           "You need a lot of bad ideas in order to get a few good ones. One of the best predictors of the greatness of a
-          classical composer
-          is the <span class="underline">sheer number of compositions that they've generated</span>. Bach, Beethoven,
-          and Mozart had to generate hundreds
-          and hundreds of compositions in order to get to a much smaller number of masterpieces. The starting point is
-          that if most of us
-          want to be more original, we have to generate more ideas." So my plea to you is write more, and don't worry if
-          every
-          blog isn't War and Peace.
+          classical composer is the <span class="underline">sheer number of compositions that they've generated</span>.
+          Bach, Beethoven, and Mozart had to generate hundreds and hundreds of compositions in order to get to a much
+          smaller
+          number of masterpieces. The starting point is that if most of us want to be more original, we have to generate
+          more ideas." So my plea to you is write more, and don't worry if every blog isn't War and Peace.
         </p>
         <footer className="text-sm">
           &mdash; Debbie Madden, <a
@@ -70,11 +76,10 @@
     </div>
 
     <div v-else-if="activeTab === 'Gists'">
-      <p class="m-2 mb-8 italic">Gists are technical snippets stored on <a href="https://gist.github.com/">Github</a>. I've
-        used them
-        over time to keep little snippets of code and instructions that don't quite rise to the level of full
-        repository.
-        I'll frequently refer back to gists that I've written, and I hope you find these useful as well!</p>
+      <p class="m-2 mb-8 italic">Gists are technical snippets stored on <a href="https://gist.github.com/">Github</a>.
+        I've used them over time to keep little snippets of code and instructions that don't quite rise to the level
+        of full repository. I'll frequently refer back to gists that I've written, and I hope you find these useful as
+        well!</p>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <div v-for="gist in displayedGists" :key="gist.id" class="bg-white rounded-lg overflow-hidden shadow-lg">
           <div class="p-6">
@@ -117,19 +122,47 @@ const blogStore = useBlogStore()
 const gistsStore = useGistsStore()
 
 const searchQuery = ref('')
+const debouncedSearchQuery = ref('')
+const searchTimeout = ref<ReturnType<typeof setTimeout> | null>(null)
+
 const currentPage = ref(1)
 const postsPerPage = 9
 const activeTab = useState('blogActiveTab', () => 'Blog Posts')
 
+const getIndicatorCount = (tab: string) => {
+  if (!debouncedSearchQuery.value) return 0
+  if (tab === 'Blog Posts' && activeTab.value === 'Gists') {
+    return filteredPosts.value.length
+  }
+  if (tab === 'Gists' && activeTab.value === 'Blog Posts') {
+    return filteredGists.value.length
+  }
+  return 0
+}
+
 const filteredPosts = computed(() => {
-  if (!searchQuery.value) return blogStore.publishedPosts
-  return blogStore.searchPosts(searchQuery.value)
+  if (!debouncedSearchQuery.value) return blogStore.publishedPosts
+  return blogStore.searchPosts(debouncedSearchQuery.value)
 })
 
 const filteredGists = computed(() => {
-  if (!searchQuery.value) return gistsStore.publicGists
-  return gistsStore.searchGists(searchQuery.value)
+  if (!debouncedSearchQuery.value) return gistsStore.publicGists
+  return gistsStore.searchGists(debouncedSearchQuery.value)
 })
+
+const debouncedSearch = () => {
+  if (searchTimeout.value) clearTimeout(searchTimeout.value)
+  searchTimeout.value = setTimeout(() => {
+    debouncedSearchQuery.value = searchQuery.value
+    currentPage.value = 1
+  }, 300) // 300ms delay
+}
+
+const clearSearch = () => {
+  searchQuery.value = ''
+  debouncedSearchQuery.value = ''
+  currentPage.value = 1
+}
 
 const totalPages = computed(() => {
   const contentLength = activeTab.value === 'Blog Posts' ? filteredPosts.value.length : filteredGists.value.length
