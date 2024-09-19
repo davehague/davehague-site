@@ -28,3 +28,40 @@ export interface BlogPost {
   updated_at: Date;
   is_draft: boolean;
 }
+
+export interface Gist {
+  id: string;
+  node_id: string;
+  html_url: string;
+  git_pull_url: string;
+  git_push_url: string;
+  commits_url: string;
+  forks_url: string;
+  public: boolean;
+  created_at: string;
+  updated_at: string;
+  description: string | null;
+  comments: number;
+  comments_url: string;
+  owner: {
+    login: string;
+    id: number;
+    node_id: string;
+    avatar_url: string;
+    gravatar_id: string;
+    url: string;
+    html_url: string;
+    type: string;
+  } | null;
+  user: null;
+  files: {
+    [filename: string]: {
+      filename: string;
+      type: string;
+      language: string | null;
+      raw_url: string;
+      size: number;
+    }
+  };
+  truncated: boolean;
+}
