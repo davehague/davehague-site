@@ -68,7 +68,7 @@ useHead(() => ({
     { property: 'og:title', content: gist.value?.description || 'Untitled Gist' },
     { property: 'og:description', content: `Gist: ${gist.value?.description || 'Untitled'}` },
     { property: 'og:type', content: 'article' },
-    { property: 'og:url', content: `https://yourdomain.com/gists/${route.params.id}` },
+    { property: 'og:url', content: `https://davehague.com/gists/${route.params.id}` },
   ],
 }))
 </script>

@@ -14,6 +14,7 @@
         <h1 class="text-4xl font-bold mb-2">{{ post.title }}</h1>
         <p class="text-sm italic text-gray-600 mb-6">{{ formatDate(post.updated_at) }}</p>
         <div class="prose lg:prose-xl markdown-content" v-html="post.renderedContent"></div>
+        <BlogSubscriptionForm />
       </div>
       <div v-else class="text-center">
         <p>Post not found</p>
@@ -52,7 +53,7 @@ useHead(() => ({
     { property: 'og:title', content: post.value?.title },
     { property: 'og:description', content: post.value?.excerpt },
     { property: 'og:type', content: 'article' },
-    { property: 'og:url', content: `https://yourdomain.com/blog/${route.params.slug}` },
+    { property: 'og:url', content: `https://davehague.com/blog/${route.params.slug}` },
   ],
 }))
 </script>

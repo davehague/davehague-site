@@ -65,5 +65,11 @@ export interface GistFile {
   raw_url: string;
   size: number;
   content: string;
-  renderedContent?: string; 
+  renderedContent?: string;
+}
+
+export interface BlogSubscribers {
+  id: number;
+  email: string;
+  created_at: Date;
 }
