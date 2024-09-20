@@ -6,25 +6,57 @@
         New Post
       </NuxtLink>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div v-for="post in blogStore.blogPosts" :key="post.id" class="bg-white shadow-md rounded-lg overflow-hidden">
-        <div class="flex flex-col h-full p-4">
-          <div class="flex justify-between items-center mb-2">
-            <NuxtLink :to="`/blog/${post.slug}`" class="text-xl font-semibold hover:text-blue-600">
-              {{ post.title }}
-            </NuxtLink>
-            <span v-if="post.is_draft" class="bg-yellow-200 text-yellow-800 px-2 py-1 rounded text-sm">Draft</span>
+
+    <!-- Drafts Section -->
+    <div v-if="draftPosts.length > 0" class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Drafts</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pl-4">
+        <div v-for="post in draftPosts" :key="post.id" class="bg-white shadow-md rounded-lg overflow-hidden">
+          <div class="flex flex-col h-full p-4">
+            <div class="flex justify-between items-center mb-2">
+              <NuxtLink :to="`/blog/${post.slug}`" class="text-xl font-semibold hover:text-blue-600">
+                {{ post.title }}
+              </NuxtLink>
+              <span class="bg-yellow-200 text-yellow-800 px-2 py-1 rounded text-sm">Draft</span>
+            </div>
+            <p class="text-gray-600 mb-4 flex-grow">{{ post.excerpt }}</p>
+            <div class="flex justify-end space-x-2 mt-auto">
+              <NuxtLink :to="`/blog/edit/${post.slug}`"
+                class="bg-gray-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Edit
+              </NuxtLink>
+              <button @click="openDeleteModal(post)"
+                class="bg-gray-700 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                Delete
+              </button>
+            </div>
           </div>
-          <p class="text-gray-600 mb-4 flex-grow">{{ post.excerpt }}</p>
-          <div class="flex justify-end space-x-2 mt-auto">
-            <NuxtLink :to="`/blog/edit/${post.slug}`"
-              class="bg-gray-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-              Edit
-            </NuxtLink>
-            <button @click="openDeleteModal(post)"
-              class="bg-gray-700 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-              Delete
-            </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Published Posts Section -->
+    <div>
+      <h2 class="text-2xl font-semibold mb-4">Published Posts</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pl-4">
+        <div v-for="post in publishedPosts" :key="post.id" class="bg-white shadow-md rounded-lg overflow-hidden">
+          <div class="flex flex-col h-full p-4">
+            <div class="flex justify-between items-center mb-2">
+              <NuxtLink :to="`/blog/${post.slug}`" class="text-xl font-semibold hover:text-blue-600">
+                {{ post.title }}
+              </NuxtLink>
+            </div>
+            <p class="text-gray-600 mb-4 flex-grow">{{ post.excerpt }}</p>
+            <div class="flex justify-end space-x-2 mt-auto">
+              <NuxtLink :to="`/blog/edit/${post.slug}`"
+                class="bg-gray-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Edit
+              </NuxtLink>
+              <button @click="openDeleteModal(post)"
+                class="bg-gray-700 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -56,14 +88,26 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useBlogStore } from '~/stores/blogStore'
-import type { BlogPost } from '~/types/interfaces'
+import { ref, onMounted, computed } from 'vue'
+import { useBlogStore } from '@/stores/blogStore'
+import type { BlogPost } from '@/types/interfaces'
 
 const blogStore = useBlogStore()
 const showDeleteModal = ref(false)
 const postToDelete = ref<BlogPost | null>(null)
 const deletePassword = ref('')
+
+const draftPosts = computed(() => 
+  [...blogStore.blogPosts]
+    .filter(post => post.is_draft)
+    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+)
+
+const publishedPosts = computed(() => 
+  [...blogStore.blogPosts]
+    .filter(post => !post.is_draft)
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+)
 
 const fetchPosts = async () => {
   await blogStore.fetchBlogPosts(true, true)
