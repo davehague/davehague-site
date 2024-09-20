@@ -1,9 +1,24 @@
 import { defineEventHandler, readBody, getQuery, createError } from "h3";
 import { supabase } from "~/utils/supabaseClient";
-import { BlogSubscribers } from "~/types/interfaces";
 
 export default defineEventHandler(async (event) => {
   const method = event.node.req.method;
+
+  if (method === "GET") {
+    const { data, error } = await supabase
+      .from("blog_subscribers")
+      .select("email");
+
+    if (error) {
+      console.error("Error fetching subscribers:", error);
+      throw createError({
+        statusCode: 500,
+        statusMessage: "Error fetching subscribers",
+      });
+    }
+
+    return { success: true, data };
+  }
 
   if (method === "POST") {
     const body = await readBody(event);
@@ -17,10 +32,10 @@ export default defineEventHandler(async (event) => {
 
     if (error) {
       // Check if the error is due to a duplicate email
-      if (error.code === '23505') {
+      if (error.code === "23505") {
         return { success: false, message: "This email is already subscribed." };
       }
-      
+
       console.error("Error adding subscriber:", error);
       throw createError({
         statusCode: 500,

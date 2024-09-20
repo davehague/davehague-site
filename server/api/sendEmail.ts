@@ -52,6 +52,7 @@ const sendSubscriptionConfirmation = async (email: string) => {
         Subject: "Subscription Confirmation for Dave Hague's Blog",
         HTMLPart: `<h3>Thanks for subscribing to the blog at davehague.com!</h3>
             <p>Hey, David here. Thanks for wanting to keep up to date with everything I'm doing.  If you ever want to chat, just reply to this email.  Looking forward to sharing my journey with you!</p>
+            <br />
             <p style="font-size: smaller; font-style: italic;">If you didn't intend to subscribe, you can unsubscribe by clicking <a href="https://davehague.com/blog/unsubscribe?email=${email}">here</a>.</p>
             `,
       },
@@ -83,9 +84,41 @@ const sendUnsubscribeConfirmation = async (email: string) => {
   });
 };
 
+const sendNewBlogPosted = async (
+  email: string,
+  title: string,
+  excerpt: string,
+  slug: string
+) => {
+  return mailjet.post("send", { version: "v3.1" }).request({
+    Messages: [
+      {
+        From: {
+          Email: "dave@promptblocks.app",
+          Name: "David Hague",
+        },
+        To: [
+          {
+            Email: email,
+          },
+        ],
+        Subject: `New Blog Post: ${title}`,
+        HTMLPart: `
+            <p>A new blog post has been published on davehague.com!</p>
+            <h2>${title}</h2>
+            <p>${excerpt}</p>
+            <p><a href="https://davehague.com/blog/${slug}">Read the full post here</a></p>
+            <br />
+            <p style="font-size: smaller; font-style: italic;">If you no longer wish to receive these updates, you can unsubscribe by clicking <a href="https://davehague.com/blog/unsubscribe?email=${email}">here</a>.</p>
+          `,
+      },
+    ],
+  });
+};
+
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
-  const { name, email, message, action } = body;
+  const { name, email, message, action, title, excerpt, slug } = body;
 
   try {
     if (action === "contact") {
@@ -94,6 +127,8 @@ export default defineEventHandler(async (event) => {
       await sendSubscriptionConfirmation(email);
     } else if (action === "unsubscribe") {
       await sendUnsubscribeConfirmation(email);
+    } else if (action === "newBlogPost") {
+      await sendNewBlogPosted(email, title, excerpt, slug);
     } else {
       throw new Error("Invalid action");
     }
