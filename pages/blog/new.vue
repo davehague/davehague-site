@@ -15,6 +15,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { type BlogPost } from '~/types/interfaces'
+import { publishPost } from '~/utils/blogUtils'
 
 const router = useRouter()
 
@@ -26,42 +27,15 @@ const createPost = async (data: Partial<BlogPost> & { password: string }) => {
       body: JSON.stringify(data)
     })
     if (!response.ok) throw new Error('Failed to create blog post')
-
+    
     if (!data.is_draft) {
-      await sendEmailsToSubscribers(data)
+      await publishPost(data)
     }
-
+    
     await router.push('/blog/manage')
   } catch (error) {
     console.error('Error creating blog post:', error)
     alert('Failed to create blog post')
-  }
-}
-
-const sendEmailsToSubscribers = async (post: Partial<BlogPost>) => {
-  try {
-    // Fetch all subscribers
-    const subscribersResponse = await fetch('/api/blogSubscribers')
-    if (!subscribersResponse.ok) throw new Error('Failed to fetch subscribers')
-    const subscribers = await subscribersResponse.json()
-
-    // Send email to each subscriber
-    for (const subscriber of subscribers.data) {
-      await fetch('/api/sendEmail', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: subscriber.email,
-          action: 'newBlogPost',
-          title: post.title,
-          excerpt: post.excerpt,
-          slug: post.slug
-        })
-      })
-    }
-  } catch (error) {
-    console.error('Error sending emails to subscribers:', error)
-    alert('Blog post created, but there was an error sending notification emails.')
   }
 }
 </script>

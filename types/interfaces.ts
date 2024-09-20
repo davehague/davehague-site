@@ -68,7 +68,7 @@ export interface GistFile {
   renderedContent?: string;
 }
 
-export interface BlogSubscribers {
+export interface BlogSubscriber {
   id: number;
   email: string;
   created_at: Date;

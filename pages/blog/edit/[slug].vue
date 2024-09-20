@@ -18,6 +18,8 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { type BlogPost } from '~/types/interfaces'
+import { publishPost } from '~/utils/blogUtils'
+
 
 const route = useRoute()
 const router = useRouter()
@@ -42,6 +44,11 @@ const updatePost = async (data: Partial<BlogPost> & { password: string }) => {
       body: JSON.stringify({ ...data, newSlug: data.slug })
     })
     if (!response.ok) throw new Error('Failed to update blog post')
+    
+    if (post.value?.is_draft && !data.is_draft) {
+      await publishPost(data)
+    }
+    
     await router.push('/blog/manage')
   } catch (error) {
     console.error('Error updating blog post:', error)
