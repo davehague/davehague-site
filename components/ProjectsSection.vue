@@ -42,7 +42,7 @@
 import { ref } from 'vue'
 import {
   Coins, TrainFrontTunnel, Binoculars, Blocks, Clock8,
-  ScanEye, Soup, PencilRuler, NotebookPen, PhoneIncoming, SquareCheckBig, Keyboard
+  ScanEye, Soup, PencilRuler, NotebookPen, PhoneIncoming, SquareCheckBig, Keyboard, HousePlug,
 } from 'lucide-vue-next'
 
 const shippedProjects = [
@@ -153,6 +153,16 @@ const experiments = [
     techFrameworks: 'Electron',
     link: 'https://github.com/davehague/llm-wrapper-electron',
   },
+  {
+    id: 11,
+    name: 'Adulting.DIY',
+    description: 'Keep up with your home, your dog, and your life',
+    icon: HousePlug,
+    techLanguages: 'Typescript',
+    techFrameworks: 'VueJS, NuxtJS',
+    techServices: 'Postgres, Mailjet, Vercel',
+    link: 'https://adulting.diy/',
+  }
 ]
 
 const projectGroups = ref([
