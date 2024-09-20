@@ -1,5 +1,5 @@
 <template>
-  <div class="container mx-auto p-6 max-w-md">
+  <div class="container mx-auto p-6 max-w-md py-20">
     <h1 class="text-3xl font-bold mb-4">Unsubscribe from Blog Updates</h1>
     <p v-if="!email" class="mb-4">
       No email address provided. Please check the link in your email.
@@ -8,11 +8,11 @@
       <p class="mb-4">
         Are you sure you want to unsubscribe {{ email }} from blog updates?
       </p>
-      <button @click="unsubscribe"
+      <button v-if="!message" @click="unsubscribe"
         class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300" :disabled="isLoading">
         {{ isLoading ? 'Processing...' : 'Unsubscribe' }}
       </button>
-      <p v-if="message" :class="{ 'text-green-600': !error, 'text-red-600': error }" class="mt-4">
+      <p v-if="message" :class="{ 'text-green-600': !error, 'text-red-600': error }" class="mt-8">
         {{ message }}
       </p>
     </div>
