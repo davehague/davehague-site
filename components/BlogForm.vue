@@ -1,6 +1,6 @@
 <template>
-  <form @submit.prevent="submitForm" class="space-y-4">
-    <!-- Form fields (title, slug, excerpt) -->
+  <form @submit.prevent="showPasswordModal" class="space-y-4">
+    <!-- Form fields-->
     <div>
       <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
       <input v-model="title" id="title" type="text" required @input="generateSlug"
@@ -18,7 +18,7 @@
         class="mt-1 block w-full rounded-md p-2 border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"></textarea>
     </div>
 
-    <!-- Markdown editor and preview section -->
+    <!-- Content field with preview -->
     <div>
       <div class="flex justify-between items-center mb-2">
         <label for="content" class="block text-sm font-medium text-gray-700">Content</label>
@@ -39,14 +39,8 @@
       </div>
     </div>
 
-    <!-- Password field and buttons -->
-    <div>
-      <label for="admin-password" class="block text-sm font-medium text-gray-700">Admin Password</label>
-      <input v-model="password" id="admin-password" name="admin-password" type="password"
-        autocomplete="current-password" required
-        class="mt-1 block w-full rounded-md p-2 border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-    </div>
-    <div class="flex gap-2">
+    <!-- Submit and Cancel buttons -->
+    <div class="flex gap-2 pt-4">
       <button type="submit"
         class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
         {{ submitButtonText }}
@@ -64,6 +58,23 @@
       </div>
     </div>
   </form>
+
+  <!-- Password Modal -->
+  <div v-if="isPasswordModalVisible"
+    class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+      <h2 class="text-xl font-bold mb-4">Enter Admin Password</h2>
+      <input v-model="password" type="password" placeholder="Admin Password"
+        class="mt-1 block w-full rounded-md p-2 border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+        @keyup.enter="submitForm">
+      <div class="mt-4 flex justify-end space-x-2">
+        <button @click="closePasswordModal"
+          class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">Cancel</button>
+        <button @click="submitForm"
+          class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Submit</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -126,14 +137,29 @@ function generateSlug() {
 }
 
 const password = ref('')
+const isPasswordModalVisible = ref(false)
 const submitButtonText = computed(() => props.isEdit ? 'Update Post' : 'Create Post')
 
-const submitForm = () => {
+const showPasswordModal = () => {
   if (!isSlugUnique.value) {
     alert('Please choose a unique slug')
     return
   }
+  isPasswordModalVisible.value = true
+}
+
+const closePasswordModal = () => {
+  isPasswordModalVisible.value = false
+  password.value = ''
+}
+
+const submitForm = () => {
+  if (password.value.trim() === '') {
+    alert('Please enter the admin password')
+    return
+  }
   emit('submit', { ...formData.value, password: password.value })
+  closePasswordModal()
 }
 
 const goToManagePage = () => {
