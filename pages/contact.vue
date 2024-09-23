@@ -51,7 +51,10 @@ const submitForm = async () => {
   try {
     const response = await $fetch('/api/sendEmail', {
       method: 'POST',
-      body: form.value
+      body: {
+        ...form.value,
+        action: 'contact' 
+      }
     })
 
     if (response.success) {
