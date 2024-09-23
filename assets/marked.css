@@ -84,18 +84,59 @@
 }
 
 /* Blockquotes */
-.markdown-content blockquote {
-  margin: 0 0 16px;
-  padding: 0 1em;
-  color: #6a737d;
-  border-left: 0.25em solid #dfe2e5;
+blockquote {
+  margin: 2em 0;
+  padding: 1.5em 2em;
+  background-color: #f9f9f9;
+  border-left: 4px solid #0366d6;
+  position: relative;
 }
 
-.markdown-content blockquote > :first-child {
-  margin-top: 0;
+blockquote::before {
+  content: '"';
+  font-size: 4em;
+  color: #0366d6;
+  opacity: 0.2;
+  position: absolute;
+  top: -0.2em;
+  left: 0.1em;
 }
-.markdown-content blockquote > :last-child {
+
+blockquote p {
+  margin-bottom: 1em;
+  line-height: 1.6;
+}
+
+blockquote p:last-child {
   margin-bottom: 0;
+}
+
+blockquote strong {
+  font-weight: 600;
+}
+
+blockquote em {
+  font-style: italic;
+}
+
+blockquote p:last-child em {
+  display: block;
+  text-align: right;
+  margin-top: 1em;
+  color: #666;
+}
+
+blockquote a {
+  color: #0366d6;
+  text-decoration: none;
+}
+
+blockquote a:hover {
+  text-decoration: underline;
+}
+
+blockquote .underline {
+  text-decoration: underline;
 }
 
 /* Code blocks */

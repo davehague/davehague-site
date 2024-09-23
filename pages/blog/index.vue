@@ -33,29 +33,26 @@
 
     <!-- Content -->
     <div v-if="activeTab === 'Blog Posts'">
-      <blockquote
-        className="relative p-4 mb-8 text-md italic border-l-4 bg-neutral-100 text-neutral-600 border-neutral-500 quote">
-        <div className="stylized-quote-mark absolute top-0 left-0 text-4xl text-neutral-500 mt-3 ml-4">
-          &ldquo;
-        </div>
-        <p className="ml-4 mb-4">
+      <blockquote>
+        <p>
           The thing that stops most of us from writing a compelling article that gets noticed is that most of us
           don't write enough crappy articles. We're too afraid to fail publicly, to write something less than perfect.
           But that's exactly the opposite of what we need to be doing. Adam Grant, author of The Originals, nails it:
           "You need a lot of bad ideas in order to get a few good ones. One of the best predictors of the greatness of a
           classical composer is the <span class="underline">sheer number of compositions that they've generated</span>.
           Bach, Beethoven, and Mozart had to generate hundreds and hundreds of compositions in order to get to a much
-          smaller
-          number of masterpieces. The starting point is that if most of us want to be more original, we have to generate
+          smaller number of masterpieces. The starting point is that if most of us want to be more original, we have to
+          generate
           more ideas." So my plea to you is write more, and don't worry if every blog isn't War and Peace.
         </p>
-        <footer className="text-sm">
-          &mdash; Debbie Madden, <a
-            href="https://www.amazon.com/Hire-Women-Framework-Retaining-Technology-ebook/dp/B07G8QTJNH"
-            className="text-blue-600 hover:text-blue-800 transition-colors duration-300">
-            Hire Women: An Agile Framework for Hiring and Retaining Women in Technology
-          </a>
-        </footer>
+        <p>
+          <em>
+            Debbie Madden,
+            <a href="https://www.amazon.com/Hire-Women-Framework-Retaining-Technology-ebook/dp/B07G8QTJNH">
+              Hire Women: An Agile Framework for Hiring and Retaining Women in Technology
+            </a>
+          </em>
+        </p>
       </blockquote>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <div v-for="post in displayedPosts" :key="post.id" class="bg-white rounded-lg overflow-hidden shadow-lg">
