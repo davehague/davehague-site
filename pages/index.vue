@@ -1,19 +1,22 @@
 <template>
   <div>
-    <section id="hero" class="min-h-screen flex items-center justify-center bg-gray-200">
-      <div class="text-center">
-        <div class="mb-8">
-          <img src="../public/android-chrome-512x512.png" alt="Your Name"
-            class="rounded-full w-48 h-48 mx-auto border-4 border-white shadow-lg" />
-        </div>
-        <h1 class="text-5xl font-bold mb-4 text-gray-900">Dave Hague</h1>
-        <p class="text-xl mb-8 text-gray-700">Developer | AI Enthusiast</p>
-        <a href="#projects"
+    <section id="hero" class="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-300 via-gray-200 to-white">
+    <div class="text-center">
+      <div class="mb-8">
+        <img 
+          src="../public/android-chrome-512x512.png" 
+          alt="Dave Hague"
+          class="rounded-full w-48 h-48 mx-auto border-4 border-white shadow-lg" 
+        />
+      </div>
+      <h1 class="text-5xl font-bold mb-4 text-black">Dave Hague</h1>
+      <p class="text-xl mb-8 text-gray-700">Developer | AI Enthusiast</p>
+      <a href="#projects"
           class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition-colors duration-300">
           View My Work
         </a>
-      </div>
-    </section>
+    </div>
+  </section>
 
     <section id="about" class="py-20 bg-white">
       <div class="container mx-auto px-6">
@@ -52,7 +55,7 @@
 
     <BlogSection />
 
-    <section id="contact" class="py-20 bg-gray-200">
+    <section id="contact" class="py-20 bg-gradient-to-b from-white via-gray-200 to-gray-300">
       <div class="container mx-auto px-6 text-center">
         <h2 class="text-3xl font-bold mb-8 text-gray-900">Get in Touch</h2>
         <p class="text-xl mb-8 text-gray-700">Interested in collaborating or just want to say hi? Feel free to reach
