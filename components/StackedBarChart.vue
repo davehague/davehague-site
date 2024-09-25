@@ -50,6 +50,7 @@ const prepareChartData = (repos, commits) => {
     label: repo.name,
     data: new Array(days.length).fill(0),
     backgroundColor: getColorForRepo(repo.name),
+    hidden: false,
   }));
 
   const dateIndex = {};
@@ -121,6 +122,28 @@ const createChart = (data) => {
           },
           legend: {
             position: 'top',
+            onClick: (evt, item, legend) => {
+              const index = legend.chart.data.datasets.findIndex((d) => d.label === item.text);
+              if (index > -1) {
+                const clickedDataset = legend.chart.data.datasets[index];
+                const allHidden = legend.chart.data.datasets.every((d) => d.hidden);
+                const onlyThisVisible = legend.chart.data.datasets.every((d, i) => i === index ? !d.hidden : d.hidden);
+
+                if (onlyThisVisible || allHidden) {
+                  // If only this dataset is visible or all are hidden, show all datasets
+                  legend.chart.data.datasets.forEach((dataset) => {
+                    dataset.hidden = false;
+                  });
+                } else {
+                  // Otherwise, show only the clicked dataset
+                  legend.chart.data.datasets.forEach((dataset, i) => {
+                    dataset.hidden = i !== index;
+                  });
+                }
+
+                legend.chart.update();
+              }
+            }
           }
         }
       }
