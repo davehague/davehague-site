@@ -31,9 +31,7 @@ export const useGithubStore = defineStore("github", {
     async ensureDataFreshness() {
       const now = new Date();
       const fourHoursAgo = new Date(now.getTime() - 4 * 60 * 60 * 1000);
-      const ytdDate = new Date(now.getFullYear(), 0, 1); // January 1st of current year
 
-      // Load lastFetchTime from localStorage
       const storedLastFetch = localStorage.getItem(LAST_FETCH_KEY);
       if (storedLastFetch) {
         this.lastFetchTime = new Date(storedLastFetch);
@@ -63,13 +61,14 @@ export const useGithubStore = defineStore("github", {
 
     async fetchProjects() {
       this.loading = true;
-      const ytdDate = new Date(new Date().getFullYear(), 0, 1); // January 1st of current year
+      const yearAgo = new Date();
+      yearAgo.setFullYear(yearAgo.getFullYear() - 1);
 
       try {
-        const repos = await this.fetchUserRepos(ytdDate.toISOString());
+        const repos = await this.fetchUserRepos(yearAgo.toISOString());
         const projectsWithCommits = await Promise.all(
           repos.map(async (repo) => {
-            const allCommits = await this.fetchCommits(repo.id, ytdDate);
+            const allCommits = await this.fetchCommits(repo.id, yearAgo);
             return { ...repo, allCommits };
           })
         );
@@ -138,8 +137,10 @@ export const useGithubStore = defineStore("github", {
         sinceDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
       }
 
-      return state.projects.filter(
-        (project) => new Date(project.pushed_at) >= sinceDate
+      return state.projects.filter((project) =>
+        project.allCommits.some(
+          (commit) => new Date(commit.author_date) >= sinceDate
+        )
       );
     },
     getCommitsByPeriod: (state) => (period: string) => {
