@@ -59,7 +59,7 @@ const shippedProjects = [
   {
     id: 2,
     name: 'PromptBlocks',
-    description: 'A prompt library that enabled you to compose, share, tag, and parameterize your LLM prompts.',
+    description: 'A prompt library that enables you to compose, share, tag, and parameterize your LLM prompts.',
     techLanguages: 'Typescript',
     techFrameworks: 'VueJS, NuxtJS',
     techServices: 'Supabase, LLMs, Mailjet, Vercel',
