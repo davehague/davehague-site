@@ -25,7 +25,7 @@
               I'm a seasoned developer with a passion for building and shipping software. I specialize in taking
               products <strong>from ideation to MVP.</strong>
               I'm currently focused on building using Python
-              and TypeScript, but I'm a former .NET developer, Java Delevoper, integrations consultant, and engineering
+              and TypeScript, but I'm a former .NET developer, Java developer, integrations consultant, and engineering
               leader. I've seen a lot, but there's always more to learn.
             </p>
             <p class="text-lg text-gray-700">
@@ -51,8 +51,6 @@
         </div>
       </div>
     </section>
-
-    <AboutYou />
 
     <ProjectsSection />
 
