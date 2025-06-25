@@ -4,7 +4,7 @@
       class="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-300 via-gray-200 to-white">
       <div class="text-center">
         <div class="mb-8">
-          <img src="../public/android-chrome-512x512.png" alt="Dave Hague"
+          <img src="/dave-headshot.png" alt="Dave Hague"
             class="rounded-full w-48 h-48 mx-auto border-4 border-white shadow-lg" />
         </div>
         <h1 class="text-5xl font-bold mb-4 text-black">Dave Hague</h1>
