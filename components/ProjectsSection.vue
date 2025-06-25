@@ -41,7 +41,7 @@
 <script setup>
 import { ref } from 'vue'
 import {
-  TrainFrontTunnel, Binoculars, Blocks, Soup, NotebookPen, PhoneIncoming, HousePlug, RocketIcon,
+  TrainFrontTunnel, Binoculars, Blocks, Soup, NotebookPen, PhoneIncoming, HousePlug, RocketIcon, CupSoda
 } from 'lucide-vue-next'
 
 const shippedProjects = [
@@ -65,17 +65,29 @@ const shippedProjects = [
     icon: Blocks,
     link: 'https://promptblocks.app/',
   },
+  {
+    id: 3,
+    name: 'Bubble Tea Finder',
+    description: 'A directory website to help user find bubble tea places across the country.',
+    techLanguages: 'Typescript',
+    techFrameworks: 'VueJS, NuxtJS',
+    techServices: 'CockroachDB, Perplexity, Vercel',
+    icon: CupSoda,
+    link: 'https://www.bubbleteafinder.com/',
+  },
+  {
+    id: 4,
+    name: 'Founder Dinners',
+    description: 'Have anonymous dinners with other founders in central Ohio.',
+    techLanguages: 'Typescript',
+    techFrameworks: 'VueJS, NuxtJS',
+    techServices: 'Supabase, Vercel',
+    icon: Soup,
+    link: 'https://www.startupfounderdinners.com/',
+  },
 ]
 
 const emergingProjects = [
-  {
-    id: 4,
-    name: 'Prompt Central Station',
-    description: 'Decouple prompt management from application code. Enable non-technical users to modify prompts and parameters without code changes.',
-    icon: TrainFrontTunnel,
-    techLanguages: 'Python',
-    link: 'https://github.com/davehague/prompt-central-station/',
-  },
   {
     id: 5,
     name: 'Voracious',
@@ -110,6 +122,14 @@ const experiments = [
     link: 'Link coming soon',
   },
   {
+    id: 12,
+    name: 'Prompt Central Station',
+    description: 'Decouple prompt management from application code. Enable non-technical users to modify prompts and parameters without code changes.',
+    icon: TrainFrontTunnel,
+    techLanguages: 'Python',
+    link: 'https://github.com/davehague/prompt-central-station/',
+  },
+  {
     id: 9,
     name: 'Caller Coach',
     description: 'Get a call from AI to keep you on track with your goals.',
@@ -117,7 +137,7 @@ const experiments = [
     techLanguages: 'Python',
     link: 'Link coming soon', //'https://github.com/davehague/caller_coach',
   },
- {
+  {
     id: 11,
     name: 'Adulting.DIY',
     description: 'Keep up with your home, your dog, and your life',
