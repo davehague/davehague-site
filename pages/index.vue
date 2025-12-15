@@ -9,10 +9,6 @@
         </div>
         <h1 class="text-5xl font-bold mb-4 text-black">Dave Hague</h1>
         <p class="text-xl mb-8 text-gray-700">Founder | Developer | AI Enthusiast</p>
-        <a href="#projects"
-          class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition-colors duration-300">
-          View My Work
-        </a>
       </div>
     </section>
 
@@ -22,17 +18,11 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div>
             <p class="text-lg mb-4 text-gray-700">
-              I'm a seasoned developer with a passion for building and shipping software. I specialize in taking
-              products <strong>from ideation to MVP.</strong>
-              I'm currently focused on building using Python
+              I'm a seasoned developer with a passion for building and shipping software that solves real world
+              problems. I'm currently focused on building using Python
               and TypeScript, but I'm a former .NET developer, Java developer, integrations consultant, and engineering
-              leader. I've seen a lot, but there's always more to learn.
-            </p>
-            <p class="text-lg text-gray-700">
-              Recently, I've embarked on a founder's journey, which means I'm <em>working on my shipping muscle 💪</em>
-              while I explore the
-              exciting world of <span class="font-semibold italic">generative AI</span> to build solutions that solve
-              real problems.
+              leader. I've seen a lot, but there's always more to learn. I'm passionate about AI and its potential to
+              transform industries and improve lives, so if you've got questions about that, let's chat!
             </p>
             <p class="text-lg mt-4 text-gray-700">
               I live in central Ohio with my wife, dog, and daughter, and I love to write software.
@@ -52,25 +42,26 @@
       </div>
     </section>
 
-    <!-- <ProjectsSection /> -->
-    <section id="projects" class="py-20 bg-gray-100">
+    <section id="my-work" class="py-20 bg-gray-100">
       <div class="container mx-auto px-6 text-center">
-        <h2 class="text-4xl font-bold mb-8 text-gray-900">Projects</h2>
-        <p class="text-xl mb-8 text-gray-700">
-          Check out my latest projects, experiments, and shipped products
+        <h2 class="text-4xl font-bold mb-8 text-gray-900">My Work @ Time To Value</h2>
+        <p class="text-xl mb-4 text-gray-700">
+          I help individuals and small businesses use AI
+          to do more with less.
         </p>
-        <a href="https://www.vibed.cool/dave" target="_blank" rel="noopener noreferrer"
+        <p class="text-lg mb-8 text-gray-700">
+          I bring years of software delivery experience to every engagement: clean architecture, proper
+          testing, and AI that actually scales.
+        </p>
+        <a href="https://www.time2value.com/" target="_blank" rel="noopener noreferrer"
           class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition-colors duration-300 text-lg">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
             xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
           </svg>
-          View My Projects
+          See My Services
         </a>
-        <p class="text-sm text-gray-500 mt-4">
-          Explore my portfolio on Vibed.Cool
-        </p>
       </div>
     </section>
 
