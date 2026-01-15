@@ -41,9 +41,18 @@ const reposAndCommits = computed(() => {
   return getReposAndCommits(selectedPeriod.value);
 });
 
+const getEndDate = (period) => {
+  // Check if period is a year (4-digit number)
+  if (/^\d{4}$/.test(period)) {
+    const year = parseInt(period);
+    return new Date(year, 11, 31);
+  }
+  return new Date();
+};
+
 const prepareChartData = (repos, commits) => {
   const startDate = getStartDate(selectedPeriod.value);
-  const endDate = new Date();
+  const endDate = getEndDate(selectedPeriod.value);
   const days = eachDayOfInterval({ start: startDate, end: endDate });
 
   const datasets = repos.map(repo => ({

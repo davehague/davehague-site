@@ -3,12 +3,28 @@
     <div class="container mx-auto px-6">
       <h2 class="text-3xl font-bold mb-8 text-gray-900 text-center">My GitHub Activity</h2>
 
-      <div class="mb-8 flex justify-center space-x-2 md:space-x-4">
-        <button v-for="period in timePeriods" :key="period.value" @click="updateSelectedPeriod(period.value)"
-          class="px-2 md:px-4 py-1 rounded-md transition-colors duration-300 text-sm md:text-lg"
-          :class="selectedPeriod === period.value ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'">
-          {{ period.label }}
-        </button>
+      <!-- Recent periods row -->
+      <div class="mb-4 flex flex-wrap justify-center items-center gap-2">
+        <span class="text-sm text-gray-500 font-medium w-16 text-right hidden md:inline">Recent</span>
+        <div class="flex flex-wrap justify-center gap-2">
+          <button v-for="period in recentPeriods" :key="period.value" @click="updateSelectedPeriod(period.value)"
+            class="min-w-[70px] md:min-w-[100px] px-2 md:px-4 py-1 rounded-md transition-colors duration-300 text-sm md:text-lg text-center"
+            :class="selectedPeriod === period.value ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'">
+            {{ period.label }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Year periods row -->
+      <div class="mb-8 flex flex-wrap justify-center items-center gap-2">
+        <span class="text-sm text-gray-500 font-medium w-16 text-right hidden md:inline">By Year</span>
+        <div class="flex flex-wrap justify-center gap-2">
+          <button v-for="period in yearPeriods" :key="period.value" @click="updateSelectedPeriod(period.value)"
+            class="min-w-[70px] md:min-w-[100px] px-2 md:px-4 py-1 rounded-md transition-colors duration-300 text-sm md:text-lg text-center"
+            :class="selectedPeriod === period.value ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'">
+            {{ period.label }}
+          </button>
+        </div>
       </div>
 
       <StackedBarChart :timeframe="selectedPeriod" class="mb-8" />
@@ -118,7 +134,8 @@ const showCommitExplanation = ref(false)
 const modalText = ref('');
 const isTldrLoading = ref(false);
 
-const { selectedPeriod, projects, loading, timePeriods, daysSincePeriod, ensureDataFreshness, updateSelectedPeriod } = useChartUtils()
+const { selectedPeriod, projects, loading, recentPeriods, getYearPeriods, daysSincePeriod, ensureDataFreshness, updateSelectedPeriod } = useChartUtils()
+const yearPeriods = getYearPeriods(3)
 const isSelectedPeriodShort = computed(() => daysSincePeriod(selectedPeriod.value) <= 60)
 
 const toggleCommitExplanation = () => {
@@ -169,6 +186,11 @@ function getWeekdaysInPeriod(period) {
 function getStartDateForPeriod(period) {
   const today = new Date();
   let startDate = new Date(today);
+
+  // Check if period is a year (4-digit number)
+  if (/^\d{4}$/.test(period)) {
+    return new Date(parseInt(period), 0, 1);
+  }
 
   switch (period) {
     case "7":

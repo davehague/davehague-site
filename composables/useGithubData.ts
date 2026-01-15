@@ -4,6 +4,9 @@ import { ref } from "vue";
 import { supabase } from "@/utils/supabaseClient";
 import { type GitHubRepo, type GitHubCommit } from "@/types/interfaces";
 
+// Only sync commits from this author
+const AUTHOR_EMAIL = "david.hague@gmail.com";
+
 export function useGithubData() {
   const commits = ref<GitHubCommit[]>([]);
   const daysBetween = ref(0);
@@ -137,20 +140,31 @@ export function useGithubData() {
 
       for (const branch of branches) {
         console.log("Fetching commits for branch:", branch.name);
-        let url: string;
 
         if (import.meta.server) {
-          url = `https://api.github.com/repos/${repo_owner}/${repo}/commits?sha=${branch.name}&since=${since}`;
+          // Server-side: paginate through all commits
+          let page = 1;
+          let fetchMore = true;
+          while (fetchMore) {
+            const url = `https://api.github.com/repos/${repo_owner}/${repo}/commits?sha=${branch.name}&since=${since}&per_page=100&page=${page}`;
+            const branchCommits = await fetchFromGitHub(url, headers);
+            if (branchCommits.length > 0) {
+              allCommits.push(...processCommits(branchCommits));
+              page++;
+            } else {
+              fetchMore = false;
+            }
+          }
         } else {
-          url = `/api/github/commits?repo_owner=${encodeURIComponent(
+          // Client-side: API endpoint handles pagination
+          const url = `/api/github/commits?repo_owner=${encodeURIComponent(
             repo_owner
           )}&repo=${encodeURIComponent(repo)}&branch=${encodeURIComponent(
             branch.name
           )}&since=${encodeURIComponent(since)}`;
+          const branchCommits = await fetchFromGitHub(url, headers);
+          allCommits.push(...processCommits(branchCommits));
         }
-
-        const branchCommits = await fetchFromGitHub(url, headers);
-        allCommits.push(...processCommits(branchCommits));
       }
 
       console.log("Found", allCommits.length, "commits for repo", repo, "since", since);
@@ -163,9 +177,10 @@ export function useGithubData() {
 
   const updateGithubData = async () => {
     const now = new Date();
-    let since: Date = new Date(now);
-    since = new Date(now);
-    since.setDate(now.getDate() - 1);
+    // Look back 2 years to cover full historical data
+    // Using upsert ensures duplicates won't be created
+    const since = new Date(now);
+    since.setFullYear(now.getFullYear() - 2);
 
     console.log("Fetching repos that have pushed since:", since.toISOString());
     const repos = await fetchUserRepos(since.toISOString());
@@ -197,8 +212,13 @@ export function useGithubData() {
         since.toISOString()
       );
 
-      for (const commit of commits.value) {
-        const { data, error } = await supabase
+      // Only store commits from the configured author
+      const myCommits = commits.value.filter(
+        (commit) => commit.author_email === AUTHOR_EMAIL
+      );
+
+      for (const commit of myCommits) {
+        const { error } = await supabase
           .from("github_commits")
           .upsert([
             {
