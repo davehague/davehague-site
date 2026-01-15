@@ -34,7 +34,7 @@ This is a Nuxt 3 application for Dave Hague's personal website with the followin
 - **gistsStore**: Manages GitHub gists data
 
 ### Server API Routes (`server/api/`)
-- **GitHub Integration**: `/github/repos.ts`, `/github/commits.ts`, `/github/gists.ts`
+- **GitHub Integration**: `/github/repos.ts`, `/github/commits.ts`, `/github/gists.ts`, `/github/cron-refresh.ts`, `/github/refresh.ts`
 - **Blog Management**: `/blog.ts`, `/posts.ts`, `/blogSubscribers.ts`
 - **AI Integration**: `/openai.ts`, `/openrouter.ts`
 - **Email Service**: `/sendEmail.ts` (using Mailjet)
@@ -58,6 +58,7 @@ This is a Nuxt 3 application for Dave Hague's personal website with the followin
 
 ### Authentication & Security
 - Admin functionality protected by `ADMIN_TOKEN` environment variable
+- Vercel Cron jobs authenticated via `CRON_SECRET` environment variable
 - Supabase RLS (Row Level Security) enabled for data protection
 
 ### Deployment
@@ -66,6 +67,8 @@ This is a Nuxt 3 application for Dave Hague's personal website with the followin
 
 ## Important Notes
 - GitHub data is cached locally for 4 hours to avoid API rate limits
+- GitHub sync runs via Vercel Cron (twice daily, 7-day incremental) or manual refresh (90-day full sync)
+- GitHub data only includes commits from `david.hague@gmail.com` starting from 1/1/2024
 - Blog posts use markdown format and are processed server-side
 - The site includes analytics via Vercel Analytics
 - All TypeScript interfaces are defined in `types/interfaces.ts`
