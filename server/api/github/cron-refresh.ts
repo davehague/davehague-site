@@ -4,6 +4,11 @@
 import { defineEventHandler, createError, getHeader } from 'h3'
 import { useGithubData } from '~/composables/useGithubData'
 
+// Vercel Pro plan allows up to 300 seconds
+export const config = {
+  maxDuration: 60,
+}
+
 export default defineEventHandler(async (event) => {
   // Verify the request is from Vercel Cron
   const authHeader = getHeader(event, 'authorization')
@@ -25,10 +30,10 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    console.log('Vercel Cron: Starting GitHub data refresh')
-    const { checkAndUpdateGithubData } = useGithubData()
-    await checkAndUpdateGithubData()
-    console.log('Vercel Cron: GitHub data refresh complete')
+    console.log('Vercel Cron: Starting incremental GitHub sync (last 7 days)')
+    const { incrementalSync } = useGithubData()
+    await incrementalSync(7)
+    console.log('Vercel Cron: Incremental sync complete')
 
     return {
       success: true,

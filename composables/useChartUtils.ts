@@ -46,12 +46,13 @@ export const recentPeriods = [
   { label: "90 days", value: "90" },
 ];
 
-// Generate year periods dynamically: YTD first, then previous years
-export const getYearPeriods = (yearsBack: number = 3) => {
+// Generate year periods dynamically: YTD first, then previous years back to 2024
+const EARLIEST_YEAR = 2024;
+
+export const getYearPeriods = () => {
   const currentYear = new Date().getFullYear();
   const periods = [{ label: "YTD", value: "ytd" }];
-  for (let i = 1; i <= yearsBack; i++) {
-    const year = currentYear - i;
+  for (let year = currentYear - 1; year >= EARLIEST_YEAR; year--) {
     periods.push({ label: String(year), value: String(year) });
   }
   return periods;
@@ -60,7 +61,7 @@ export const getYearPeriods = (yearsBack: number = 3) => {
 // Combined for backwards compatibility
 export const timePeriods = [
   ...recentPeriods,
-  ...getYearPeriods(3),
+  ...getYearPeriods(),
 ];
 
 export const daysSincePeriod = (period: string): number => {

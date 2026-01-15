@@ -175,16 +175,34 @@ export function useGithubData() {
     }
   };
 
-  const updateGithubData = async () => {
+  // Incremental sync - only recent activity (for cron jobs)
+  const incrementalSync = async (daysBack: number = 7) => {
     const now = new Date();
-    // Look back 2 years to cover full historical data
-    // Using upsert ensures duplicates won't be created
     const since = new Date(now);
-    since.setFullYear(now.getFullYear() - 2);
+    since.setDate(now.getDate() - daysBack);
 
-    console.log("Fetching repos that have pushed since:", since.toISOString());
+    console.log(`Incremental sync: Fetching repos pushed in last ${daysBack} days`);
     const repos = await fetchUserRepos(since.toISOString());
+    console.log(`Found ${repos.length} repos with recent activity`);
 
+    await syncReposAndCommits(repos, since);
+  };
+
+  // Full sync - 90 days of history (for manual refresh)
+  const fullSync = async () => {
+    const now = new Date();
+    const since = new Date(now);
+    since.setDate(now.getDate() - 90);
+
+    console.log("Full sync: Fetching all repos from last 90 days");
+    const repos = await fetchUserRepos(since.toISOString());
+    console.log(`Found ${repos.length} repos to sync`);
+
+    await syncReposAndCommits(repos, since);
+  };
+
+  // Shared sync logic
+  const syncReposAndCommits = async (repos: GitHubRepo[], since: Date) => {
     for (const repo of repos) {
       const { data, error } = await supabase
         .from("github_repos")
@@ -201,8 +219,8 @@ export function useGithubData() {
         .select();
 
       if (error) {
-        console.error("Error when fetching repo:", error);
-        return null;
+        console.error("Error upserting repo:", error);
+        continue;
       }
 
       const repo_id = (data as any)[0].id;
@@ -216,6 +234,8 @@ export function useGithubData() {
       const myCommits = commits.value.filter(
         (commit) => commit.author_email === AUTHOR_EMAIL
       );
+
+      console.log(`Repo ${repo.name}: ${myCommits.length} commits to sync`);
 
       for (const commit of myCommits) {
         const { error } = await supabase
@@ -235,47 +255,16 @@ export function useGithubData() {
           .select();
 
         if (error) {
-          console.error("Error when fetching repo:", error);
-          return null;
+          console.error("Error upserting commit:", error);
         }
       }
-    }
-  };
-
-  const checkAndUpdateGithubData = async () => {
-    const now = new Date();
-    const { data: latest_commit } = await supabase
-      .from("github_commits")
-      .select("author_date")
-      .order("author_date", { ascending: false })
-      .limit(1);
-
-    if (latest_commit && latest_commit.length > 0) {
-      const latest_db_date = new Date(latest_commit[0].author_date);
-      console.log("Latest commit date:", latest_db_date);
-      const daysSinceLastUpdate = Math.ceil(
-        (now.getTime() - latest_db_date.getTime()) / (1000 * 3600 * 24)
-      );
-
-      if (daysSinceLastUpdate >= 1) {
-        console.log(
-          "Days since last update:",
-          daysSinceLastUpdate,
-          ", updating data"
-        );
-        await updateGithubData();
-      } else {
-        console.log("Data is up to date, no update needed");
-      }
-    } else {
-      console.log("No commits in the database, updating data");
-      await updateGithubData();
     }
   };
 
   return {
     commits,
     daysBetween,
-    checkAndUpdateGithubData,
+    incrementalSync,
+    fullSync,
   };
 }

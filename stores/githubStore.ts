@@ -61,14 +61,14 @@ export const useGithubStore = defineStore("github", {
 
     async fetchProjects() {
       this.loading = true;
-      const twoYearsAgo = new Date();
-      twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+      // Design decision: only show data from 1/1/2024 onward
+      const dataStartDate = new Date(2024, 0, 1);
 
       try {
-        const repos = await this.fetchUserRepos(twoYearsAgo.toISOString());
+        const repos = await this.fetchUserRepos(dataStartDate.toISOString());
         const projectsWithCommits = await Promise.all(
           repos.map(async (repo) => {
-            const allCommits = await this.fetchCommits(repo.id, twoYearsAgo);
+            const allCommits = await this.fetchCommits(repo.id, dataStartDate);
             return { ...repo, allCommits };
           })
         );

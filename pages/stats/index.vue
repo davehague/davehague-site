@@ -20,7 +20,7 @@
         <span class="text-sm text-gray-500 font-medium w-16 text-right hidden md:inline">By Year</span>
         <div class="flex flex-wrap justify-center gap-2">
           <button v-for="period in yearPeriods" :key="period.value" @click="updateSelectedPeriod(period.value)"
-            class="min-w-[70px] md:min-w-[100px] px-2 md:px-4 py-1 rounded-md transition-colors duration-300 text-sm md:text-lg text-center"
+            class="min-w-[70px] md:min-w-[136px] px-2 md:px-4 py-1 rounded-md transition-colors duration-300 text-sm md:text-lg text-center"
             :class="selectedPeriod === period.value ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'">
             {{ period.label }}
           </button>
@@ -135,7 +135,7 @@ const modalText = ref('');
 const isTldrLoading = ref(false);
 
 const { selectedPeriod, projects, loading, recentPeriods, getYearPeriods, daysSincePeriod, ensureDataFreshness, updateSelectedPeriod } = useChartUtils()
-const yearPeriods = getYearPeriods(3)
+const yearPeriods = getYearPeriods()
 const isSelectedPeriodShort = computed(() => daysSincePeriod(selectedPeriod.value) <= 60)
 
 const toggleCommitExplanation = () => {
