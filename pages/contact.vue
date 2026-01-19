@@ -17,6 +17,11 @@
       </p>
       <div class="max-w-2xl mx-auto">
         <form @submit.prevent="submitForm" class="space-y-6">
+          <!-- Honeypot field - hidden from humans, bots will fill it -->
+          <div class="absolute -left-[9999px]" aria-hidden="true">
+            <label for="website">Website</label>
+            <input v-model="form.website" type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+          </div>
           <div>
             <label for="name" class="block text-sm font-medium text-gray-700">Your Name</label>
             <input v-model="form.name" type="text" id="name" name="name" required
@@ -51,16 +56,23 @@
 
 <script setup>
 import { Copy, Check } from 'lucide-vue-next'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const form = ref({
   name: '',
   email: '',
-  message: ''
+  message: '',
+  website: '' // Honeypot field
 })
 
 const submitStatus = ref(null)
 const copied = ref(false)
+const formLoadTime = ref(Date.now())
+
+// Reset load time when component mounts (for client-side navigation)
+onMounted(() => {
+  formLoadTime.value = Date.now()
+})
 
 const submitForm = async () => {
   try {
@@ -68,13 +80,14 @@ const submitForm = async () => {
       method: 'POST',
       body: {
         ...form.value,
-        action: 'contact'
+        action: 'contact',
+        _loadTime: formLoadTime.value
       }
     })
 
     if (response.success) {
       submitStatus.value = { success: true, message: 'Thank you for your message! I will get back to you soon.' }
-      form.value = { name: '', email: '', message: '' }
+      form.value = { name: '', email: '', message: '', website: '' }
     } else {
       throw new Error(response.message || 'Failed to send message')
     }

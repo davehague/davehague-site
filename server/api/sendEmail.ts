@@ -116,12 +116,32 @@ const sendNewBlogPosted = async (
   });
 };
 
+// Minimum time (in ms) a human should take to fill out the contact form
+const MIN_FORM_TIME_MS = 3000;
+
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
-  const { name, email, message, action, title, excerpt, slug } = body;
+  const { name, email, message, action, title, excerpt, slug, website, _loadTime } = body;
 
   try {
     if (action === "contact") {
+      // Bot protection: Check honeypot field
+      if (website) {
+        console.log("Bot detected: honeypot field filled");
+        // Return success to not tip off the bot
+        return { success: true, message: "Email sent successfully" };
+      }
+
+      // Bot protection: Check form fill time
+      if (_loadTime) {
+        const fillTime = Date.now() - _loadTime;
+        if (fillTime < MIN_FORM_TIME_MS) {
+          console.log(`Bot detected: form filled too fast (${fillTime}ms)`);
+          // Return success to not tip off the bot
+          return { success: true, message: "Email sent successfully" };
+        }
+      }
+
       await sendContactFormEmail(name, email, message);
     } else if (action === "subscribe") {
       await sendSubscriptionConfirmation(email);
